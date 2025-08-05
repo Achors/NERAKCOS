@@ -23,7 +23,16 @@ body {
 .animate-slideUp {
   animation: slideUp 1s ease-out forwards;
 }
-
+@media (max-width: 640px) {
+  .footer-icon {
+    font-size: 14px !important;
+  }
+}
+@media (min-width: 640px) {
+  .footer-icon {
+    font-size: 20px !important;
+  }
+}
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
