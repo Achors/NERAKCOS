@@ -1,0 +1,46 @@
+const API_BASE_URL = 'http://localhost:5000/api/';
+
+export const api = {
+  contact: {
+    submit: () => `${API_BASE_URL}contact`,
+  },
+  auth: {
+    register: () => `${API_BASE_URL}register`,
+    login: () => `${API_BASE_URL}login`,
+    resetPassword: () => `${API_BASE_URL}reset-password`,
+  },
+  profile: {
+    get: (userId) => `${API_BASE_URL}profile?user_id=${userId}`,
+    update: (userId) => `${API_BASE_URL}profile?user_id=${userId}`,
+  },
+  products: {
+    list: () => `${API_BASE_URL}products`,
+    create: () => `${API_BASE_URL}products`,
+  },
+  categories: {
+    list: () => `${API_BASE_URL}categories`,
+    create: () => `${API_BASE_URL}categories`,
+  },
+  orders: {
+    list: () => `${API_BASE_URL}orders`,
+    create: () => `${API_BASE_URL}orders`,
+    update: (orderId) => `${API_BASE_URL}orders/${orderId}`,
+  },
+  collaborate: {
+    submit: () => `${API_BASE_URL}collaborate`,
+    list: () => `${API_BASE_URL}contact-message`,
+  },
+};
+
+export const fetchApi = async (url, options = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Request failed');
+  return data;
+};

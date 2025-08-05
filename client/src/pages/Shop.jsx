@@ -1,45 +1,57 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { api, fetchApi } from '../api';
+import { useSearch } from '../pages/searchcontext';
+import { FaSearch } from 'react-icons/fa'; 
 
 const Shop = () => {
-  // Mock API data (replace with real API call later)
   const [products, setProducts] = useState([]);
+  const [filters, setFilters] = useState({ category: "", priceRange: "" });
+  const [showFilters, setShowFilters] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const { searchTerm, setSearchTerm } = useSearch();
+
   useEffect(() => {
-    // Simulated API response
-    setProducts([
-      { id: 1, name: "Elegant Dress", images: ["/img1.jpg", "/img2.jpg", "/img3.jpg"], price: 99.99 },
-      { id: 2, name: "Stylish Jacket", images: ["/img4.jpg", "/img5.jpg", "/img6.jpg"], price: 129.99 },
-      // Add more products as needed
-    ]);
+    const fetchData = async () => {
+      try {
+        const productsData = await fetchApi(api.products.list());
+        setProducts(productsData.map(product => ({ ...product, currentSlide: 0 })));
+        const categoriesData = await fetchApi(api.categories.list());
+        setCategories(categoriesData);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    };
+    fetchData();
   }, []);
 
-  // Filter state
-  const [filters, setFilters] = useState({ category: "", size: "", priceRange: "" });
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Handle filter changes
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  // Filtered products (mock logic)
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
   const filteredProducts = products.filter((product) => {
-    return (
-      (filters.category === "" || product.category === filters.category) &&
-      (filters.size === "" || product.size === filters.size) &&
-      (filters.priceRange === "" || (filters.priceRange === "under100" && product.price < 100) || (filters.priceRange === "100-200" && product.price >= 100 && product.price <= 200))
-    );
+    const matchesSearch = !searchTerm || 
+      (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = filters.category === "" || product.category_id === parseInt(filters.category);
+    const matchesPrice = filters.priceRange === "" || 
+      (filters.priceRange === "under100" && product.price < 100) || 
+      (filters.priceRange === "100-200" && product.price >= 100 && product.price <= 200);
+    return matchesSearch && matchesCategory && matchesPrice;
   });
 
-  // Footer visibility state and observer
-  const [isFooterVisible, setIsFooterVisible] = useState(false);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsFooterVisible(entry.isIntersecting);
       },
-      { threshold: 0.1 } // Trigger when 10% of the target is visible
+      { threshold: 0.1 }
     );
 
     const target = document.querySelector('.product-grid-end');
@@ -50,10 +62,8 @@ const Shop = () => {
     };
   }, []);
 
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Navbar */}
       <nav className="bg-slate-100 p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center relative">
           <div className="flex-shrink-0">
@@ -74,9 +84,18 @@ const Shop = () => {
             <Link to="/" className="text-black bg-transparent border border-white px-4 py-2 rounded hover:bg-slate hover:text-slate-300 transition">
               Back
             </Link>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm || ''}
+                onChange={handleSearchChange}
+                className="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
+              />
+              <FaSearch className="absolute left-3 top-2.5 text-gray-400" size={16} />
+            </div>
           </div>
         </div>
-        {/* Filter Panel */}
         {showFilters && (
           <div className="container mx-auto mt-4 bg-white p-4 rounded shadow-md">
             <select
@@ -86,20 +105,9 @@ const Shop = () => {
               className="block w-1/4 p-2 mb-2 border rounded"
             >
               <option value="">All Categories</option>
-              <option value="backpacks">Backpacks</option>
-              <option value="handbags">Handbags</option>
-              <option value="totes">Totes</option>
-            </select>
-            <select
-              name="size"
-              value={filters.size}
-              onChange={handleFilterChange}
-              className="block w-1/4 p-2 mb-2 border rounded"
-            >
-              <option value="">All Sizes</option>
-              <option value="s">S</option>
-              <option value="m">M</option>
-              <option value="l">L</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
             </select>
             <select
               name="priceRange"
@@ -115,67 +123,68 @@ const Shop = () => {
         )}
       </nav>
 
-      {/* Product Grid */}
       <div className="container mx-auto py-8 flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white p-4 rounded shadow-md">
-              {/* Image Carousel */}
-              <div className="relative w-full h-64 overflow-hidden">
-                <div
-                  className="flex transition-transform duration-300 ease-in-out"
-                  style={{ transform: `translateX(-${(product.currentSlide || 0) * 100}%)` }}
-                >
-                  {product.images.map((img, index) => (
-                    <img
-                      key={index}
-                      src={img}
-                      alt={product.name}
-                      className="w-full h-64 object-cover"
-                    />
-                  ))}
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <div key={product.id} className="bg-white p-4 rounded shadow-md">
+                <div className="relative w-full h-64 overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ transform: `translateX(-${(product.currentSlide || 0) * 100}%)` }}
+                  >
+                    {product.image_urls.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img || '/placeholder.jpg'}
+                        alt={product.name}
+                        className="w-full h-64 object-cover"
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() =>
+                      setProducts((prev) =>
+                        prev.map((p) =>
+                          p.id === product.id
+                            ? { ...p, currentSlide: (p.currentSlide || 0) - 1 < 0 ? product.image_urls.length - 1 : (p.currentSlide || 0) - 1 }
+                            : p
+                        )
+                      )
+                    }
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-black p-2 rounded-full"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={() =>
+                      setProducts((prev) =>
+                        prev.map((p) =>
+                          p.id === product.id
+                            ? { ...p, currentSlide: (p.currentSlide || 0) + 1 >= product.image_urls.length ? 0 : (p.currentSlide || 0) + 1 }
+                            : p
+                        )
+                      )
+                    }
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-white p-2 rounded-full"
+                  >
+                    ›
+                  </button>
                 </div>
-                <button
-                  onClick={() =>
-                    setProducts((prev) =>
-                      prev.map((p) =>
-                        p.id === product.id
-                          ? { ...p, currentSlide: (p.currentSlide || 0) - 1 < 0 ? product.images.length - 1 : (p.currentSlide || 0) - 1 }
-                          : p
-                      )
-                    )
-                  }
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-black p-2 rounded-full"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={() =>
-                    setProducts((prev) =>
-                      prev.map((p) =>
-                        p.id === product.id
-                          ? { ...p, currentSlide: (p.currentSlide || 0) + 1 >= product.images.length ? 0 : (p.currentSlide || 0) + 1 }
-                          : p
-                      )
-                    )
-                  }
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-white p-2 rounded-full"
-                >
-                  ›
+                <h3 className="text-lg font-montserrat mt-2">{product.name}</h3>
+                <p className="text-gray-600 font-montserrat">${product.price.toFixed(2)}</p>
+                <button className="mt-2 w-full bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-900 transition">
+                  Add to Cart
                 </button>
               </div>
-              <h3 className="text-lg font-montserrat mt-2">{product.name}</h3>
-              <p className="text-gray-600 font-montserrat">${product.price.toFixed(2)}</p>
-              <button className="mt-2 w-full bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-900 transition">
-                Add to Cart
-              </button>
-            </div>
-          ))}
-          <div className="product-grid-end" style={{ height: '1px' }}></div> {/* Invisible target for observer */}
+            ))
+          ) : (
+            <p className="text-center text-gray-500">No products found.</p>
+          )}
+          <div className="product-grid-end" style={{ height: '1px' }}></div>
         </div>
       </div>
       {isFooterVisible && <Footer />}
-      
     </div>
   );
 };

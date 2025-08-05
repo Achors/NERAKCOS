@@ -6,13 +6,28 @@ import Footer from '../components/Footer';
 const Home = () => {
   // State for carousel
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [Collections, setCollections] = useState([]);
 
-  // Dummy Instagram posts
   const instagramPosts = [
-    { id: 1, src: 'https://via.placeholder.com/300x300?text=Insta+Post+1', alt: 'Instagram Post 1' },
-    { id: 2, src: 'https://via.placeholder.com/300x300?text=Insta+Post+2', alt: 'Instagram Post 2' },
-    { id: 3, src: 'https://via.placeholder.com/300x300?text=Insta+Post+3', alt: 'Instagram Post 3' },
+    { id: 1, src: '/Insta_1.png', alt: 'Instagram Post 1' },
+    { id: 2, src: '/Insta_2.png', alt: 'Instagram Post 2' },
+    { id: 3, src: '/Insta_3.png', alt: 'Instagram Post 3' },
   ];
+
+  // Fetch collections from backend
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const data = await fetch('/api/categories');
+        const categories = await data.json();
+        setCollections(categories.map(cat => cat.name)); // Use category names
+      } catch (err) {
+        console.error('Error fetching collections:', err);
+        setCollections(['Handbags', 'Backpacks', 'Totes']);
+      }
+    };
+    fetchCollections();
+  }, []);
 
   // Carousel auto-slide
   useEffect(() => {
@@ -24,31 +39,25 @@ const Home = () => {
   
 
   return (
-    <div className="min-h-screen bg-gray-50 scroll-smooth">
+    <div className="min-h-screen bg-slate-100 scroll-smooth">
       <Navbar />
       {/* Hero Banner */}
       <section id="hero" className="relative h-screen">
-        <video
-          className="w-full h-full object-cover"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
+        <picture className="w-full h-full">
           <source src="/background_video.mp4" type="video/mp4" />
           <img
             src="/Home.png"
-            alt="Hero Image"
+            alt="Hero Background"
             className="w-full h-full object-cover"
           />
-        </video>
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="text-center text-white">
+        </picture>
+        <div className="absolute inset-0 bg-slate bg-opacity-40 flex items-center justify-center">
+          <div className="text-center text-black">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">Elevate Your Style</h1>
             <p className="text-lg md:text-xl mb-8">Discover the latest in fashion bags</p>
             <Link
               to="/shop"
-              className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition"
+              className="bg-black text-slate-100 px-6 py-3 rounded-full font-semibold hover:bg-gray-900 transition"
             >
               Discover Our Bags
             </Link>
@@ -63,7 +72,7 @@ const Home = () => {
           {['Handbags', 'Backpacks', 'Totes'].map((item, index) => (
             <div key={index} className="relative group">
               <img
-                src={`https://via.placeholder.com/400x500?text=${item}`}
+                src={`/https://via.placeholder.com/400x500?text=${item}`}
                 alt={item}
                 className="w-full h-96 object-cover rounded-lg"
               />
@@ -94,7 +103,7 @@ const Home = () => {
                   <img
                     src={post.src}
                     alt={post.alt}
-                    className="w-80 h-80 object-cover rounded-lg"
+                    className="w-90 h-120 object-cover rounded-lg"
                   />
                 </div>
               ))}
