@@ -1,5 +1,6 @@
 from app import db
 from werkzeug.security import generate_password_hash
+import json
 
 class ContactMessage(db.Model):
     __tablename__ = 'contact_messages'
@@ -30,6 +31,15 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.email}>"
 
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<Category {self.name}>"
+
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
@@ -37,13 +47,20 @@ class Product(db.Model):
     description = db.Column(db.Text)
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False, default=0)
-    category = db.Column(db.String(50))
-    image_url = db.Column(db.String(200))
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    image_urls = db.Column(db.Text, nullable=True) 
     created_at = db.Column(db.DateTime, default=db.func.now())
     orders = db.relationship('Order', backref='product', lazy=True)
 
+    def set_image_urls(self, urls):
+        self.image_urls = json.dumps(urls) if urls else None
+
+    def get_image_urls(self):
+        return json.loads(self.image_urls) if self.image_urls else []
+
     def __repr__(self):
         return f"<Product {self.name}>"
+
     
 class Order(db.Model):
     __tablename__ = 'orders'
@@ -51,9 +68,17 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    total = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), default='pending')
+    total_price = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(50), default='pending')
     created_at = db.Column(db.DateTime, default=db.func.now())
+    user = db.relationship('User', backref='orders')
+    product = db.relationship('Product', backref='orders')
 
-    def __repr__(self):
-        return f"<Order {self.id} by User {self.user_id}>"
+class CollaborationRequest(db.Model):
+    __tablename__ = 'collaboration_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False) 
+    email = db.Column(db.String(120), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(50), default='pending') 
+    created_at = db.Column(db.DateTime, default=db.func.now())
