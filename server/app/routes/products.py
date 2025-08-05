@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from app.models import Product
+from app.models import Product, Category
 
 bp = Blueprint('products', __name__)
 
@@ -12,10 +12,10 @@ def get_products():
             'id': p.id,
             'name': p.name,
             'description': p.description,
-            'price': p.price,
+            'price': float(p.price),  # Ensure float for JSON
             'stock': p.stock,
-            'category': p.category,
-            'image_url': p.image_url,
+            'category_id': p.category_id,
+            'image_urls': p.get_image_urls(),  # Return array of URLs
             'created_at': p.created_at.isoformat()
         } for p in products]), 200
     except Exception as e:
@@ -25,17 +25,18 @@ def get_products():
 def create_product():
     try:
         data = request.get_json()
-        if not data or not all(k in data for k in ('name', 'price', 'stock')):
-            return jsonify({"error": "Missing required fields (name, price, stock)"}), 400
+        if not data or not all(k in data for k in ('name', 'price', 'category_id')):
+            return jsonify({"error": "Missing required fields (name, price, category_id)"}), 400
 
         new_product = Product(
             name=data['name'],
             description=data.get('description'),
             price=data['price'],
-            stock=data['stock'],
-            category=data.get('category'),
-            image_url=data.get('image_url')
+            stock=data.get('stock', 0),
+            category_id=data['category_id']
         )
+        if 'image_urls' in data and isinstance(data['image_urls'], list):
+            new_product.set_image_urls(data['image_urls'])
         db.session.add(new_product)
         db.session.commit()
 
