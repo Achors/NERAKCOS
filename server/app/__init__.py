@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import DevelopmentConfig, ProductionConfig
 
+# Initialize extensions outside create_app to avoid circular imports
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
@@ -12,13 +13,15 @@ jwt = JWTManager()
 def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    app.config["JWT_SECRET_KEY"] = "super-secret-key"
+    app.config["JWT_SECRET_KEY"] = "super-secret-key"  # Replace with env var in production
 
+    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
+    # Import blueprints after app initialization
     from app.routes.contact import bp as contact_bp
     from app.routes.auth import bp as auth_bp
     from app.routes.products import bp as products_bp
@@ -27,12 +30,12 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes.profile import bp as profile_bp
     from app.routes.collaborate import bp as collaborate_bp
     from app.routes.categories import bp as categories_bp
-    from app.routes.upload import upload_bp, init_upload  # Import and init
+    from app.routes.upload import upload_bp, init_upload
 
     app.register_blueprint(contact_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(products_bp, url_prefix='/api')
-    app.register_blueprint(home_bp)
+    app.register_blueprint(home_bp)  # No /api prefix for home
     app.register_blueprint(orders_bp, url_prefix='/api')
     app.register_blueprint(profile_bp, url_prefix='/api')
     app.register_blueprint(collaborate_bp, url_prefix='/api')
@@ -44,14 +47,15 @@ def create_app(config_class=DevelopmentConfig):
 
     @jwt.user_identity_loader
     def user_identity_lookup(user):
-        return user
+        return user.id  # Return the user ID as the subject (sub)
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
+        from app.models import User  # Import here to avoid circular import
         identity = jwt_data["sub"]
-        return User.query.get(identity)
-
-    with app.app_context():
-        db.create_all()
+        user = User.query.get(identity)
+        if user is None:
+            raise LookupError(f"User with ID {identity} not found")
+        return user  # Ensure a User object is returned
 
     return app

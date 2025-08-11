@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from app.models import ContactMessage  # Reuse for simplicity
+from app.models import ContactMessage  # Reuse for now
 
 bp = Blueprint('collaborate', __name__)
 
@@ -20,8 +20,10 @@ def collaborate_submit():
         db.session.add(new_message)
         db.session.commit()
 
-        # PDF download
-        return jsonify({"message": "Collaboration request received! PDF will be emailed soon.", "id": new_message.id}), 201
+        return jsonify({
+            "message": "Collaboration request received! PDF will be emailed soon.",
+            "id": new_message.id
+        }), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Server error: {str(e)}"}), 500
