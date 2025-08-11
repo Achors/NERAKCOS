@@ -16,12 +16,17 @@ def register():
         if User.query.filter_by(email=data['email']).first():
             return jsonify({"error": "Email already registered"}), 400
 
-        new_user = User(email=data['email'], name=data['name'])
+        # Allow admin registration via role param (e.g., for initial setup)
+        role = data.get('role', 'customer')
+        if role not in ['customer', 'admin']:
+            return jsonify({"error": "Invalid role"}), 400
+
+        new_user = User(email=data['email'], name=data['name'], role=role)
         new_user.set_password(data['password'])
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({"message": "User registered successfully!", "id": new_user.id}), 201
+        return jsonify({"message": "User registered successfully!", "id": new_user.id, "role": role}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Server error: {str(e)}"}), 500
@@ -37,16 +42,25 @@ def login():
         if not user or not check_password_hash(user.password_hash, data['password']):
             return jsonify({"error": "Invalid credentials"}), 401
 
-        access_token = create_access_token(identity=user.id)
-        return jsonify({"message": "Login successful!", "access_token": access_token, "id": user.id, "name": user.name}), 200
+        # Use user.id as the identity, add role as an additional claim
+        access_token = create_access_token(identity=user.id, additional_claims={"role": user.role})
+
+        return jsonify({
+            "message": "Login successful!",
+            "access_token": access_token,
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "role": user.role
+        }), 200
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @bp.route('/profile', methods=['GET', 'PUT'])
-@jwt_required()  # Secure with JWT
+@jwt_required()
 def profile():
-    # This route is now handled by profile_bp, so we'll adjust auth.py later if needed
-    return jsonify({"error": "Use /api/profile endpoint"}), 400
+    # This route is a placeholder and should be handled by profile_bp
+    return jsonify({"error": "Use /api/profile endpoint from profile blueprint"}), 404
 
 @bp.route('/reset-password', methods=['POST'])
 def reset_password():
@@ -61,7 +75,6 @@ def reset_password():
 
         # Simulate token generation (in production, use a proper email service)
         reset_token = "temp_reset_token"  # Replace with real token logic (e.g., itsdangerous)
-        # Here you'd send an email with the token; for now, return it
         return jsonify({"message": "Password reset token generated!", "token": reset_token, "email": user.email}), 200
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500

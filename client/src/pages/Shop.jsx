@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { api, fetchApi } from '../api';
 import { useSearch } from '../pages/searchcontext';
-import { FaSearch } from 'react-icons/fa'; 
+import { FaSearch } from 'react-icons/fa';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
-  const [filters, setFilters] = useState({ category: "", priceRange: "" });
+  const [filters, setFilters] = useState({ category: '', priceRange: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -35,14 +35,28 @@ const Shop = () => {
     setSearchTerm(e.target.value);
   };
 
+  const handleAddToCart = async (productId) => {
+    try {
+      const response = await fetchApi(api.orders.create(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, quantity: 1 }), // Match backend field name
+      });
+      alert('Item added to cart! Admin will see this order.');
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      alert('Error adding to cart. Please log in or try again.');
+    }
+  };
+
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = !searchTerm || 
-      (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    const matchesSearch = !searchTerm ||
+      (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = filters.category === "" || product.category_id === parseInt(filters.category);
-    const matchesPrice = filters.priceRange === "" || 
-      (filters.priceRange === "under100" && product.price < 100) || 
-      (filters.priceRange === "100-200" && product.price >= 100 && product.price <= 200);
+    const matchesCategory = filters.category === '' || product.category_id === parseInt(filters.category);
+    const matchesPrice = filters.priceRange === '' ||
+      (filters.priceRange === 'under100' && product.price < 100) ||
+      (filters.priceRange === '100-200' && product.price >= 100 && product.price <= 200);
     return matchesSearch && matchesCategory && matchesPrice;
   });
 
@@ -136,8 +150,8 @@ const Shop = () => {
                     {product.image_urls.map((img, index) => (
                       <img
                         key={index}
-                        src={img || '/placeholder.jpg'}
-                        alt={product.name}
+                        src={img}
+                        alt={`${product.name} angle ${index + 1}`}
                         className="w-full h-64 object-cover"
                       />
                     ))}
@@ -173,7 +187,10 @@ const Shop = () => {
                 </div>
                 <h3 className="text-lg font-montserrat mt-2">{product.name}</h3>
                 <p className="text-gray-600 font-montserrat">${product.price.toFixed(2)}</p>
-                <button className="mt-2 w-full bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-900 transition">
+                <button
+                  onClick={() => handleAddToCart(product.id)}
+                  className="mt-2 w-full bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-900 transition"
+                >
                   Add to Cart
                 </button>
               </div>
