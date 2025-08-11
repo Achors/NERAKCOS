@@ -1,8 +1,8 @@
-"""Initial setup: contact_messages, users, products, categories, orders
+"""initial migration
 
-Revision ID: 9286c81d5354
+Revision ID: bfedc61f62f6
 Revises: 
-Create Date: 2025-08-04 15:14:09.203685
+Create Date: 2025-08-06 15:59:46.390493
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9286c81d5354'
+revision = 'bfedc61f62f6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,6 +22,15 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('collaboration_requests',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('message', sa.Text(), nullable=False),
+    sa.Column('status', sa.String(length=50), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('contact_messages',
@@ -51,7 +60,7 @@ def upgrade():
     sa.Column('price', sa.Float(), nullable=False),
     sa.Column('stock', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=True),
-    sa.Column('image_url', sa.String(length=200), nullable=True),
+    sa.Column('image_urls', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -61,8 +70,8 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('total', sa.Float(), nullable=False),
-    sa.Column('status', sa.String(length=20), nullable=True),
+    sa.Column('total_price', sa.Float(), nullable=False),
+    sa.Column('status', sa.String(length=50), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -77,5 +86,6 @@ def downgrade():
     op.drop_table('products')
     op.drop_table('users')
     op.drop_table('contact_messages')
+    op.drop_table('collaboration_requests')
     op.drop_table('categories')
     # ### end Alembic commands ###

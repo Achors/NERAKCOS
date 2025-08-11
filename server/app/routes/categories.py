@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from app.models import Category
+from app.models import Category, User
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 bp = Blueprint('categories', __name__)
 
@@ -17,8 +18,14 @@ def get_categories():
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @bp.route('/categories', methods=['POST'])
+@jwt_required()
 def create_category():
     try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user or not user.is_admin():
+            return jsonify({"error": "Unauthorized: Admin access required"}), 403
+
         data = request.get_json()
         if not data or 'name' not in data:
             return jsonify({"error": "Missing required field (name)"}), 400

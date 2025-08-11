@@ -1,27 +1,35 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
-import { useSearch } from '../pages/searchcontext'; 
+import { useSearch } from '../pages/searchcontext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { setSearchTerm } = useSearch(); // Get setSearchTerm from context
+  const { setSearchTerm } = useSearch();
+  const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
 
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value); // Update search term in context
+    setSearchTerm(e.target.value);
+  };
+
+  // Delay closing the dropdown to allow clicking
+  const handleMouseLeave = () => {
+    setTimeout(() => setIsLoginDropdownOpen(false), 500); // Increased to 500ms
+  };
+
+  // Toggle dropdown on click for better control
+  const toggleLoginDropdown = (e) => {
+    e.preventDefault();
+    setIsLoginDropdownOpen((prev) => !prev);
   };
 
   return (
-    <nav className="bg-slate-50 p-4 shadow-md relative z-10">
+    <nav className="bg-slate-50 p-4 shadow-md relative z-20">
       <div className="container mx-auto flex justify-between items-center">
         {/* Left Section: Logo and NERAKCOS Link */}
         <div className="flex-shrink-0 flex items-center space-x-4">
           <Link to="/">
-            <img
-              src="/n_logo.png"
-              alt="NERAKCOS Logo"
-              className="h-10"
-            />
+            <img src="/n_logo.png" alt="NERAKCOS Logo" className="h-10" />
           </Link>
           <Link
             to="/"
@@ -67,12 +75,39 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            <Link
-              to="/login"
-              className="block lg:inline-block bg-transparent text-black px-4 py-2 rounded border-none hover:bg-slate-300 hover:bg-opacity-100 hover:backdrop-blur-sm transition duration-300 font-montserrat"
-            >
-              Login
-            </Link>
+            {/* Login Dropdown */}
+            <div className="relative">
+              <button
+                onClick={toggleLoginDropdown} // Click to toggle
+                onMouseEnter={() => setIsLoginDropdownOpen(true)} // Hover to open
+                onMouseLeave={handleMouseLeave} // Delay close
+                className="block lg:inline-block bg-transparent text-black px-4 py-2 rounded border-none hover:bg-slate-300 hover:bg-opacity-100 hover:backdrop-blur-sm transition duration-300 font-montserrat"
+              >
+                Login
+              </button>
+              {isLoginDropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-30"
+                  onMouseEnter={() => setIsLoginDropdownOpen(true)} // Keep open while hovering options
+                  onMouseLeave={handleMouseLeave} // Delay close when leaving options
+                >
+                  <Link
+                    to="/admin/login"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                    className="block px-4 py-2 text-black hover:bg-gray-100 font-montserrat"
+                  >
+                    Admin
+                  </Link>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsLoginDropdownOpen(false)}
+                    className="block px-4 py-2 text-black hover:bg-gray-100 font-montserrat"
+                  >
+                    Client
+                  </Link>
+                </div>
+              )}
+            </div>
             <div className="relative mt-2 lg:mt-0 w-full lg:w-48">
               <input
                 type="text"

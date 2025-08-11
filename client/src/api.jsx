@@ -33,13 +33,21 @@ export const api = {
 };
 
 export const fetchApi = async (url, options = {}) => {
+  const token = localStorage.getItem('jwt_token'); 
+  const headers = {
+    ...options.headers,
+    Authorization: token ? `Bearer ${token}` : '',
+  };
+  // Only set Content-Type to application/json if not overridden (e.g., for form-data)
+  if (!options.headers || !options.headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
+
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'Request failed');
   return data;

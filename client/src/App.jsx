@@ -1,14 +1,15 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css'
 import Home from './pages/Home'
 import Shop from './pages/Shop';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import {SearchProvider} from './pages/searchcontext';
-import Navbar from './components/Navbar';
-import AdminPanel from './pages/adminpanel';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
 
 const App = () => {
   return (
@@ -18,9 +19,16 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/*"
+            element={
+              localStorage.getItem('adminUser') ? <AdminDashboard /> : <Navigate to="/admin/login" />
+            }
+          />
         </Routes>
       </Router>
     </SearchProvider>
