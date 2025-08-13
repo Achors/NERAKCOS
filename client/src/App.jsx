@@ -10,6 +10,7 @@ import Contact from './pages/Contact';
 import {SearchProvider} from './pages/searchcontext';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
+import BlogPage from './pages/Blog';
 
 const App = () => {
   return (
@@ -22,7 +23,9 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="blog" element={<BlogPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          
           <Route
             path="/admin/*"
             element={

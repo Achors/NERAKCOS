@@ -82,3 +82,12 @@ class CollaborationRequest(db.Model):
     message = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(50), default='pending')
     created_at = db.Column(db.DateTime, default=db.func.now())
+
+class BlogPost(db.Model):
+    __tablename__ = 'blog_posts'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    thumbnail = db.Column(db.String(200))
+    content = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=db.func.now())
+    isRead = db.Column(db.Boolean, default=False)

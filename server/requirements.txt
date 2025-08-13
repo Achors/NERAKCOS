@@ -6,3 +6,6 @@ Flask-JWT-Extended==4.6.0
 Werkzeug==2.3.7
 python-dotenv==1.0.0
 gunicorn
+Flask-Uploads==0.2.1  
+Flask-Mail==0.9.1 
+itsdangerous==2.1.2
