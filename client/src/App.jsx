@@ -29,7 +29,7 @@ const App = () => {
           <Route
             path="/admin/*"
             element={
-              localStorage.getItem('adminUser') ? <AdminDashboard /> : <Navigate to="/admin/login" />
+              localStorage.getItem('adminUser') ? <AdminDashboard /> : <Navigate to="/admin/login" replace/>
             }
           />
         </Routes>
