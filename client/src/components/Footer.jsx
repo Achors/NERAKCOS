@@ -16,7 +16,7 @@ const Footer = () => {
               <li className="font-montserrat text-sm sm:text-base hover:text-gray-300">Shipping Info</li>
               <li className="font-montserrat text-sm sm:text-base hover:text-gray-300">Returns Policy</li>
               <li className="font-montserrat text-sm sm:text-base hover:text-gray-300">
-                <Link to="/admin" className="hover:text-slate-400">Admin Panel</Link>
+                <Link to="/blog" className="hover:text-slate-400">Blog </Link>
               </li>
             </ul>
           </div>

@@ -28,6 +28,7 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes.home import bp as home_bp
     from app.routes.orders import bp as orders_bp
     from app.routes.profile import bp as profile_bp
+    from app.routes.blog import bp as blog_bp
     from app.routes.collaborate import bp as collaborate_bp
     from app.routes.categories import bp as categories_bp
     from app.routes.upload import upload_bp, init_upload
@@ -35,6 +36,7 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(contact_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(products_bp, url_prefix='/api')
+    app.register_blueprint(blog_bp, url_prefix='/api')
     app.register_blueprint(home_bp)  # No /api prefix for home
     app.register_blueprint(orders_bp, url_prefix='/api')
     app.register_blueprint(profile_bp, url_prefix='/api')
