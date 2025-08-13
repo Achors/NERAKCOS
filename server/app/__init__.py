@@ -47,17 +47,21 @@ def create_app(config_class=DevelopmentConfig):
     # Initialize upload configuration
     init_upload(app)
 
+    # JWT Configuration - FIXED VERSION
     @jwt.user_identity_loader
-    def user_identity_lookup(user):
-        return user.id  # Return the user ID as the subject (sub)
+    def user_identity_loader(user):
+        # If user is already an ID (int), return it directly
+        if isinstance(user, int):
+            return user
+        # If user is a User object, return its ID
+        return user.id
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
-        from app.models import User  # Import here to avoid circular import
-        identity = jwt_data["sub"]
-        user = User.query.get(identity)
-        if user is None:
-            raise LookupError(f"User with ID {identity} not found")
-        return user  # Ensure a User object is returned
+        from app.models import User  # Import inside to avoid circular imports
+        identity = jwt_data["sub"]  # 'sub' is the user ID from the token
+        user = User.query.get_or_404(identity)  # Raise 404 if not found
+        return user  # Return User object
+
 
     return app
