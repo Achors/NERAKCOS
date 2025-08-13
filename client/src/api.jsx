@@ -30,6 +30,12 @@ export const api = {
     submit: () => `${API_BASE_URL}collaborate`,
     list: () => `${API_BASE_URL}contact-message`,
   },
+  blog: {
+    list: () => `${API_BASE_URL}blog`,
+    create: () => `${API_BASE_URL}blog`,
+    update: (id) => `${API_BASE_URL}blog/${id}`,
+    delete: (id) => `${API_BASE_URL}blog/${id}`,
+  },
 };
 
 export const fetchApi = async (url, options = {}) => {

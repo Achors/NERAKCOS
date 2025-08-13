@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaUser, FaSignOutAlt, FaChartLine, FaBox, FaUsers } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUser, FaSignOutAlt, FaChartLine, FaBox, FaUsers, FaPen } from 'react-icons/fa';
 import DashboardOverview from './DashboardOverview';
 import ProductManagement from './productmanagement';
 import OrderTracking from './Ordertracking';
 import UserManagement from './UserManagement';
+import BlogManagement from './BlogManagement'; 
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -75,6 +76,15 @@ const AdminDashboard = () => {
                 <FaUsers className="mr-3" /> Users
               </Link>
             </li>
+            <li>
+              <Link
+                to="/admin/blog"
+                className="flex items-center p-2 hover:bg-gray-700 rounded"
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <FaPen className="mr-3" /> Blog
+              </Link>
+            </li>
           </ul>
         </nav>
       </aside>
@@ -109,6 +119,7 @@ const AdminDashboard = () => {
             <Route path="/products" element={<ProductManagement />} />
             <Route path="/orders" element={<OrderTracking />} />
             <Route path="/users" element={<UserManagement />} />
+            <Route path="/blog" element={<BlogManagement />} /> 
           </Routes>
         </main>
       </div>

@@ -70,10 +70,10 @@ const Navbar = () => {
               About
             </Link>
             <Link
-              to="/contact"
+              to="/blog"
               className="block lg:inline-block text-black hover:text-neutral-950 font-montserrat py-2 lg:py-0"
             >
-              Contact
+              Blog
             </Link>
             {/* Login Dropdown */}
             <div className="relative">

@@ -16,7 +16,6 @@ def register():
         if User.query.filter_by(email=data['email']).first():
             return jsonify({"error": "Email already registered"}), 400
 
-        # Allow admin registration via role param (e.g., for initial setup)
         role = data.get('role', 'customer')
         if role not in ['customer', 'admin']:
             return jsonify({"error": "Invalid role"}), 400
@@ -39,10 +38,9 @@ def login():
             return jsonify({"error": "Missing required fields (email, password)"}), 400
 
         user = User.query.filter_by(email=data['email']).first()
-        if not user or not check_password_hash(user.password_hash, data['password']):
+        if not user or not user.check_password(data['password']):  # Use the model method
             return jsonify({"error": "Invalid credentials"}), 401
 
-        # Use user.id as the identity, add role as an additional claim
         access_token = create_access_token(identity=user.id, additional_claims={"role": user.role})
 
         return jsonify({
@@ -59,7 +57,6 @@ def login():
 @bp.route('/profile', methods=['GET', 'PUT'])
 @jwt_required()
 def profile():
-    # This route is a placeholder and should be handled by profile_bp
     return jsonify({"error": "Use /api/profile endpoint from profile blueprint"}), 404
 
 @bp.route('/reset-password', methods=['POST'])
@@ -73,8 +70,7 @@ def reset_password():
         if not user:
             return jsonify({"error": "User not found"}), 404
 
-        # Simulate token generation (in production, use a proper email service)
-        reset_token = "temp_reset_token"  # Replace with real token logic (e.g., itsdangerous)
+        reset_token = "temp_reset_token"  # Replace with real token logic
         return jsonify({"message": "Password reset token generated!", "token": reset_token, "email": user.email}), 200
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
