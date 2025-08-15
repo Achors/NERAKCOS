@@ -76,10 +76,10 @@ const Home = () => {
                 alt={item}
                 className="w-full h-96 object-cover rounded-lg"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
+              <div className="absolute inset-0 bg-slate-200 bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
                 <Link
                   to="/shop"
-                  className="text-white text-lg font-semibold opacity-0 group-hover:opacity-100 transition"
+                  className="text-black text-lg font-semibold opacity-0 group-hover:opacity-100 transition"
                 >
                   Shop {item}
                 </Link>

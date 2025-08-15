@@ -20,7 +20,7 @@ const AdminLogin = () => {
       if (response.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
-        navigate('/login'); // Redirect back if not admin
+        navigate('/login'); 
       }
     } catch (err) {
       alert('Invalid credentials or not an admin');

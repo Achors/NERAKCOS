@@ -1,0 +1,58 @@
+import React from 'react';
+
+const TeamMember = ({ name, role, description, imageUrl }) => {
+  return (
+    <div className="flex flex-col items-center text-center p-4">
+      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300">
+        <img src={imageUrl} alt={`${name}'s profile`} className="w-full h-full object-cover" />
+      </div>
+      <h3 className="mt-2 text-lg font-semibold">{name}</h3>
+      <p className="text-sm text-gray-600">{role}</p>
+      <p className="mt-1 text-sm text-gray-700">{description}</p>
+    </div>
+  );
+};
+
+const TeamSection = () => {
+  const teamMembers = [
+    {
+      name: "Alex Johnson",
+      role: "Founder & CEO",
+      description: "Leads the vision and strategy, driving innovation and growth.",
+      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+    },
+    {
+      name: "Maria Lopez",
+      role: "Head of Design",
+      description: "Oversees creative direction and user experience design.",
+      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+    },
+    {
+      name: "Samir Patel",
+      role: "Tech Lead",
+      description: "Manages development and ensures robust tech solutions.",
+      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+    },
+    {
+      name: "Emma Chen",
+      role: "Marketing Partner",
+      description: "Handles branding and outreach to grow our community.",
+      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+    },
+  ];
+
+  return (
+    <section className="py-12 bg-slate-100">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center mb-8">Our Team</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {teamMembers.map((member, index) => (
+            <TeamMember key={index} {...member} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default TeamSection;

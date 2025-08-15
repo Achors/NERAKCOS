@@ -35,6 +35,7 @@ export const api = {
     create: () => `${API_BASE_URL}blog`,
     update: (id) => `${API_BASE_URL}blog/${id}`,
     delete: (id) => `${API_BASE_URL}blog/${id}`,
+    upload: () => `${API_BASE_URL}blog/upload`,
   },
 };
 
