@@ -1,9 +1,10 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import DevelopmentConfig, ProductionConfig
+import os
 
 # Initialize extensions outside create_app to avoid circular imports
 db = SQLAlchemy()
@@ -14,6 +15,7 @@ def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
     app.config["JWT_SECRET_KEY"] = "super-secret-key"  # Replace with env var in production
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')  # Define upload folder
 
     # Initialize extensions
     db.init_app(app)
@@ -63,5 +65,9 @@ def create_app(config_class=DevelopmentConfig):
         user = User.query.get_or_404(identity)  # Raise 404 if not found
         return user  # Return User object
 
+    # Add static file serving for uploads
+    @app.route('/uploads/<filename>')
+    def uploaded_file(filename):
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
     return app

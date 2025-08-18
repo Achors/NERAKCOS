@@ -19,25 +19,25 @@ const TeamSection = () => {
       name: "Alex Johnson",
       role: "Founder & CEO",
       description: "Leads the vision and strategy, driving innovation and growth.",
-      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+      imageUrl: "https://via.placeholder.com/100", 
     },
     {
       name: "Maria Lopez",
       role: "Head of Design",
       description: "Oversees creative direction and user experience design.",
-      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+      imageUrl: "https://via.placeholder.com/100", 
     },
     {
       name: "Samir Patel",
       role: "Tech Lead",
       description: "Manages development and ensures robust tech solutions.",
-      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+      imageUrl: "https://via.placeholder.com/100", 
     },
     {
       name: "Emma Chen",
       role: "Marketing Partner",
       description: "Handles branding and outreach to grow our community.",
-      imageUrl: "https://via.placeholder.com/100", // Replace with real image URL
+      imageUrl: "https://via.placeholder.com/100", 
     },
   ];
 
