@@ -41,8 +41,22 @@ class User(db.Model):
 class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    slug = db.Column(db.String(50), nullable=False, unique=True)  # URL-friendly version
     description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    # Relationship with products
+    products = db.relationship('Product', backref='category', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+            'description': self.description,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
 
     def __repr__(self):
         return f"<Category {self.name}>"
@@ -51,19 +65,36 @@ class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False, default=0)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
-    image_urls = db.Column(db.Text, nullable=True)
+    image_urls = db.Column(db.Text, nullable=True)  # Store as JSON string
+    description = db.Column(db.Text)  # Added description field
     created_at = db.Column(db.DateTime, default=db.func.now())
-    orders = db.relationship('Order', backref='product', lazy=True)
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    
+    # Foreign key to category
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
 
     def set_image_urls(self, urls):
         self.image_urls = json.dumps(urls) if urls else None
 
     def get_image_urls(self):
         return json.loads(self.image_urls) if self.image_urls else []
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'price': float(self.price),
+            'stock': self.stock,
+            'image_urls': self.get_image_urls(),
+            'description': self.description,
+            'category_id': self.category_id,
+            'category': self.category.slug if self.category else None,
+            'category_name': self.category.name if self.category else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
 
     def __repr__(self):
         return f"<Product {self.name}>"
@@ -77,6 +108,9 @@ class Order(db.Model):
     total_price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(50), default='pending')
     created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    # Add relationship to product
+    product = db.relationship('Product', backref='orders')
 
 class CollaborationRequest(db.Model):
     __tablename__ = 'collaboration_requests'

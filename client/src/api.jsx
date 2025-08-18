@@ -1,9 +1,7 @@
 const API_BASE_URL = 'http://localhost:5000/api/';
 
 export const api = {
-  contact: {
-    submit: () => `${API_BASE_URL}contact`,
-  },
+  contact: { submit: () => `${API_BASE_URL}contact` },
   auth: {
     register: () => `${API_BASE_URL}register`,
     login: () => `${API_BASE_URL}login`,
@@ -40,13 +38,16 @@ export const api = {
 };
 
 export const fetchApi = async (url, options = {}) => {
-  const token = localStorage.getItem('jwt_token'); 
+  const token = localStorage.getItem('jwt_token');
   const headers = {
     ...options.headers,
     Authorization: token ? `Bearer ${token}` : '',
   };
-  // Only set Content-Type to application/json if not overridden (e.g., for form-data)
-  if (!options.headers || !options.headers['Content-Type']) {
+
+  // Remove Content-Type if FormData is present, let browser set multipart/form-data
+  if (options.body instanceof FormData) {
+    delete headers['Content-Type'];
+  } else if (!options.headers || !options.headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
 
