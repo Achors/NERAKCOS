@@ -13,9 +13,9 @@ const ProductManagement = () => {
   });
 
   const categories = [
-    { value: 'tote', label: 'Tote Bag' },
+    { value: 'tote-bag', label: 'Tote Bag' },
     { value: 'backpack', label: 'Backpack' },
-    { value: 'handbag', label: 'Handbag' }
+    { value: 'hand-bag', label: 'Handbag' }
   ];
 
   useEffect(() => {

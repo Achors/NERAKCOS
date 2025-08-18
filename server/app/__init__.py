@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask import signals
 from config import DevelopmentConfig, ProductionConfig
 import os
 
@@ -32,7 +33,7 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes.profile import bp as profile_bp
     from app.routes.blog import bp as blog_bp
     from app.routes.collaborate import bp as collaborate_bp
-    from app.routes.categories import bp as categories_bp
+    from app.routes.categories import bp as categories_bp, initialize_default_categories
     from app.routes.upload import upload_bp, init_upload
 
     app.register_blueprint(contact_bp, url_prefix='/api')
@@ -54,20 +55,28 @@ def create_app(config_class=DevelopmentConfig):
     def user_identity_loader(user):
         # If user is already an ID (int), return it directly
         if isinstance(user, int):
-            return user
+            return str(user)
         # If user is a User object, return its ID
-        return user.id
+        return str(user.id)
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
         from app.models import User  # Import inside to avoid circular imports
         identity = jwt_data["sub"]  # 'sub' is the user ID from the token
-        user = User.query.get_or_404(identity)  # Raise 404 if not found
+        user = User.query.get_or_404(int(identity))  # Raise 404 if not found
         return user  # Return User object
 
     # Add static file serving for uploads
     @app.route('/uploads/<filename>')
     def uploaded_file(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+    # Initialize default categories on first app request using signal
+    def initialize_categories():
+        with app.app_context():
+            initialize_default_categories()
+
+    with app.app_context():
+        initialize_categories()
 
     return app
