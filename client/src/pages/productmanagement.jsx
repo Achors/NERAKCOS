@@ -24,7 +24,7 @@ const ProductManagement = () => {
         const data = await fetchApi(api.products.list());
         setProducts(data);
       } catch (err) {
-        console.error('Error fetching products:', err);
+        console.error('Error fetching products:', err.message, err.response?.data);
       }
     };
     fetchProducts();
@@ -48,7 +48,7 @@ const ProductManagement = () => {
       setShowModal(false);
       setNewProduct({ name: '', price: '', stock: '', category: '', images: [] });
     } catch (err) {
-      console.error('Error adding product:', err);
+      console.error('Error adding product:', err.message, err.response?.data);
     }
   };
 

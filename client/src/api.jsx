@@ -1,39 +1,53 @@
-const API_BASE_URL = 'http://localhost:5000/api/';
+const config = {
+  development: {
+    API_BASE_URL: 'http://localhost:5000/api',
+  },
+  production: {
+    API_BASE_URL: 'https://nerakcos-1.onrender.com/api/',
+  },
+};
 
+// Detect environment
+const environment = process.env.NODE_ENV || 'development';
+
+// Export the appropriate config
+export const API_CONFIG = config[environment];
+
+// Use API_CONFIG.API_BASE_URL in the api object
 export const api = {
-  contact: { submit: () => `${API_BASE_URL}contact` },
+  contact: { submit: () => `${API_CONFIG.API_BASE_URL}contact` },
   auth: {
-    register: () => `${API_BASE_URL}register`,
-    login: () => `${API_BASE_URL}login`,
-    resetPassword: () => `${API_BASE_URL}reset-password`,
+    register: () => `${API_CONFIG.API_BASE_URL}register`,
+    login: () => `${API_CONFIG.API_BASE_URL}login`,
+    resetPassword: () => `${API_CONFIG.API_BASE_URL}reset-password`,
   },
   profile: {
-    get: (userId) => `${API_BASE_URL}profile?user_id=${userId}`,
-    update: (userId) => `${API_BASE_URL}profile?user_id=${userId}`,
+    get: (userId) => `${API_CONFIG.API_BASE_URL}profile?user_id=${userId}`,
+    update: (userId) => `${API_CONFIG.API_BASE_URL}profile?user_id=${userId}`,
   },
   products: {
-    list: () => `${API_BASE_URL}products`,
-    create: () => `${API_BASE_URL}products`,
+    list: () => `${API_CONFIG.API_BASE_URL}products`,
+    create: () => `${API_CONFIG.API_BASE_URL}products`,
   },
   categories: {
-    list: () => `${API_BASE_URL}categories`,
-    create: () => `${API_BASE_URL}categories`,
+    list: () => `${API_CONFIG.API_BASE_URL}categories`,
+    create: () => `${API_CONFIG.API_BASE_URL}categories`,
   },
   orders: {
-    list: () => `${API_BASE_URL}orders`,
-    create: () => `${API_BASE_URL}orders`,
-    update: (orderId) => `${API_BASE_URL}orders/${orderId}`,
+    list: () => `${API_CONFIG.API_BASE_URL}orders`,
+    create: () => `${API_CONFIG.API_BASE_URL}orders`,
+    update: (orderId) => `${API_CONFIG.API_BASE_URL}orders/${orderId}`,
   },
   collaborate: {
-    submit: () => `${API_BASE_URL}collaborate`,
-    list: () => `${API_BASE_URL}contact-message`,
+    submit: () => `${API_CONFIG.API_BASE_URL}collaborate`,
+    list: () => `${API_CONFIG.API_BASE_URL}contact-message`,
   },
   blog: {
-    list: () => `${API_BASE_URL}blog`,
-    create: () => `${API_BASE_URL}blog`,
-    update: (id) => `${API_BASE_URL}blog/${id}`,
-    delete: (id) => `${API_BASE_URL}blog/${id}`,
-    upload: () => `${API_BASE_URL}blog/upload`,
+    list: () => `${API_CONFIG.API_BASE_URL}blog`,
+    create: () => `${API_CONFIG.API_BASE_URL}blog`,
+    update: (id) => `${API_CONFIG.API_BASE_URL}blog/${id}`,
+    delete: (id) => `${API_CONFIG.API_BASE_URL}blog/${id}`,
+    upload: () => `${API_CONFIG.API_BASE_URL}blog/upload`,
   },
 };
 
