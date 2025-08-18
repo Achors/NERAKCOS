@@ -71,7 +71,7 @@ def get_product(product_id):
 def create_product():
     try:
         # Check if user is admin
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         from app.models import User
         user = User.query.get(current_user_id)
         if not user or not user.is_admin():
@@ -132,7 +132,7 @@ def create_product():
 def update_product(product_id):
     try:
         # Check if user is admin
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         from app.models import User
         user = User.query.get(current_user_id)
         if not user or not user.is_admin():
@@ -197,7 +197,7 @@ def update_product(product_id):
 def delete_product(product_id):
     try:
         # Check if user is admin
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         from app.models import User
         user = User.query.get(current_user_id)
         if not user or not user.is_admin():
@@ -240,7 +240,7 @@ def get_categories():
 def create_category():
     try:
         # Check if user is admin
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         from app.models import User
         user = User.query.get(current_user_id)
         if not user or not user.is_admin():
