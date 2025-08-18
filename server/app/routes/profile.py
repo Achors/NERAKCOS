@@ -9,7 +9,7 @@ bp = Blueprint('profile', __name__)
 @jwt_required()
 def get_profile():
     try:
-        current_user_id = get_jwt_identity() 
+        current_user_id = int(get_jwt_identity()) 
         user = User.query.get(current_user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
@@ -33,7 +33,7 @@ def get_profile():
 @jwt_required()
 def update_profile():
     try:
-        current_user_id = get_jwt_identity()  # Returns user.id (int)
+        current_user_id = int(get_jwt_identity())# Returns user.id (int)
         user = User.query.get(current_user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
