@@ -22,7 +22,7 @@ def create_app(config_class=DevelopmentConfig):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"/api/*": {"origins": os.environ.get('FRONTEND_URL', '*')}}, supports_credentials=True)
 
     # Import blueprints after app initialization
     from app.routes.contact import bp as contact_bp
