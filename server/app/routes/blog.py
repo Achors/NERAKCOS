@@ -16,7 +16,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@bp.route('/api/blog', methods=['GET'])
+@bp.route('/blog', methods=['GET'])
 def get_posts():
     """Get all blog posts"""
     posts = BlogPost.query.order_by(BlogPost.date.desc()).all()
@@ -31,7 +31,7 @@ def get_posts():
         } for post in posts
     ])
 
-@bp.route('/api/blog', methods=['POST'])
+@bp.route('/blog', methods=['POST'])
 def create_post():
     """Create a new blog post"""
     data = request.get_json()
@@ -71,7 +71,7 @@ def create_post():
         db.session.rollback()
         return jsonify({'error': 'Failed to create post'}), 500
 
-@bp.route('/api/blog/<int:id>', methods=['PUT'])
+@bp.route('/blog/<int:id>', methods=['PUT'])
 def update_post(id):
     """Update an existing blog post"""
     post = BlogPost.query.get_or_404(id)
@@ -105,7 +105,7 @@ def update_post(id):
         db.session.rollback()
         return jsonify({'error': 'Failed to update post'}), 500
 
-@bp.route('/api/blog/<int:id>', methods=['DELETE'])
+@bp.route('/blog/<int:id>', methods=['DELETE'])
 def delete_post(id):
     """Delete a blog post"""
     post = BlogPost.query.get_or_404(id)
@@ -130,7 +130,7 @@ def delete_post(id):
         db.session.rollback()
         return jsonify({'error': 'Failed to delete post'}), 500
 
-@bp.route('/api/blog/upload', methods=['POST'])
+@bp.route('/blog/upload', methods=['POST'])
 def upload_blog_image():
     """Upload an image file for blog posts"""
     # Check if file is in request
@@ -178,7 +178,7 @@ def upload_blog_image():
     
     return jsonify({'error': 'Invalid file type. Please upload PNG, JPG, JPEG, GIF, or WebP files.'}), 400
 
-@bp.route('/api/blog/<int:id>/toggle-read', methods=['PATCH'])
+@bp.route('/blog/<int:id>/toggle-read', methods=['PATCH'])
 def toggle_read_status(id):
     """Toggle the read status of a blog post"""
     post = BlogPost.query.get_or_404(id)

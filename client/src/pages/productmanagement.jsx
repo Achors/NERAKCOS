@@ -99,6 +99,7 @@ const ProductManagement = () => {
                           src={img}
                           alt={`${product.name} angle ${index + 1}`}
                           className="w-12 h-12 object-cover rounded-md border"
+                          onError={(e) => console.log(`Image load failed: ${e.target.src}`)}
                         />
                       ))}
                       {product.image_urls?.length > 3 && (

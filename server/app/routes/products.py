@@ -15,21 +15,21 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_uploaded_file(file):
-    """Save uploaded file and return the URL"""
+    """Save uploaded file and return the full URL"""
     if file and allowed_file(file.filename):
-        # Generate unique filename
         filename = str(uuid.uuid4()) + '_' + secure_filename(file.filename)
-        
-        # Create upload directory if it doesn't exist
-        upload_dir = os.path.join(current_app.root_path, 'uploads', 'products')
+        upload_dir = os.path.join(current_app.root_path,'static', 'uploads', 'products')
         os.makedirs(upload_dir, exist_ok=True)
-        
-        # Save file
         filepath = os.path.join(upload_dir, filename)
-        file.save(filepath)
-        
-        # Return URL path - matches your app's upload serving
-        return f'/uploads/{filename}'
+        try:
+            file.save(filepath)
+            print(f"File saved to {filepath}")  # Debug log
+            # Use environment variable or default to local URL
+            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+            return f'{base_url}/uploads/{filename}'
+        except Exception as e:
+            print(f"Error saving file: {e}")
+            return None
     return None
 
 # Get all products
@@ -119,6 +119,7 @@ def create_product():
         db.session.add(product)
         db.session.commit()
         
+        print("Product response:", product.to_dict())
         return jsonify(product.to_dict()), 201
         
     except ValueError as e:
