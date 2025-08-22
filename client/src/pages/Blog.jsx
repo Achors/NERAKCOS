@@ -3,20 +3,30 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import YouTube from 'react-youtube';
+import { api, fetchApi, API_CONFIG } from '../api';
 
 const BlogPage = () => {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch posts from backend
+  // Fetch posts from backend using fetchApi
   useEffect(() => {
-    fetch('/api/blog')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch posts');
-        return res.json();
-      })
-      .then((data) => setPosts(data))
-      .catch((err) => console.error('Error fetching posts:', err));
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchApi(api.blog.list());
+        console.log('Fetched posts:', data); // Log fetched data
+        setPosts(data);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setError('Failed to load posts. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
   }, []);
 
   const handlePostClick = (postId) => {
@@ -77,6 +87,11 @@ const BlogPage = () => {
         {/* Sidebar: Post List */}
         <aside className="md:w-1/3 bg-slate-100 rounded-lg shadow-lg p-4 overflow-y-auto max-h-[600px]">
           <h2 className="text-2xl font-montserrat font-bold mb-4">Posts</h2>
+          {loading && <p className="text-center text-gray-500">Loading posts...</p>}
+          {error && <p className="text-center text-red-500">{error}</p>}
+          {!loading && !error && posts.length === 0 && (
+            <p className="text-center text-gray-500">No posts available.</p>
+          )}
           <ul className="space-y-4">
             {posts.map((post) => (
               <li
@@ -87,7 +102,21 @@ const BlogPage = () => {
                 }`}
               >
                 <div className="flex items-center space-x-4">
-                  <img src={post.thumbnail} alt={post.title} className="w-16 h-16 object-cover rounded" />
+                  {post.thumbnail ? (
+                    <img
+                      src={`${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}${post.thumbnail}`}
+                      alt={post.title}
+                      className="w-16 h-16 object-cover rounded"
+                      onError={(e) => {
+                        console.error(`Failed to load image: ${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}${post.thumbnail}`);
+                        e.target.src = '/placeholder.png'; // Fallback image in /public
+                      }}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                      <span className="text-gray-500 text-sm">No Image</span>
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-lg font-montserrat">{post.title}</h3>
                     <p className="text-sm text-gray-500">{post.date}</p>
@@ -100,18 +129,35 @@ const BlogPage = () => {
 
         {/* Main Content: Selected Post */}
         <main className="md:w-full bg-white rounded-lg shadow-lg p-6 overflow-y-auto max-h-[600px]">
-          {selectedPost ? (
+          {loading && <p className="text-center text-gray-500">Loading...</p>}
+          {error && <p className="text-center text-red-500">{error}</p>}
+          {!loading && !error && !selectedPost && (
+            <p className="text-center text-gray-500">Select a post to read the story.</p>
+          )}
+          {selectedPost && (
             <div>
               <button onClick={handleBack} className="text-blue-500 mb-4 hover:underline">
                 Back to Posts
               </button>
               <h1 className="text-3xl font-montserrat font-bold mb-4">{selectedPost.title}</h1>
-              <img src={selectedPost.thumbnail} alt={selectedPost.title} className="w-full h-64 object-cover rounded-lg mb-4" />
+              {selectedPost.thumbnail ? (
+                <img
+                  src={`${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}${selectedPost.thumbnail}`}
+                  alt={selectedPost.title}
+                  className="w-full h-64 object-cover rounded-lg mb-4"
+                  onError={(e) => {
+                    console.error(`Failed to load image: ${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}${selectedPost.thumbnail}`);
+                    e.target.src = '/placeholder.png'; // Fallback image in /public
+                  }}
+                />
+              ) : (
+                <div className="w-full h-64 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500">No Image</span>
+                </div>
+              )}
               <p className="text-gray-700 leading-relaxed">{selectedPost.content}</p>
               <p className="text-sm text-gray-500 mt-4">{selectedPost.date}</p>
             </div>
-          ) : (
-            <p className="text-center text-gray-500">Select a post to read the story.</p>
           )}
         </main>
       </div>

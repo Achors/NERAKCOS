@@ -1,6 +1,6 @@
 const config = {
   development: {
-    API_BASE_URL: 'http://localhost:5000/api',
+    API_BASE_URL: 'http://localhost:5000/api/',
   },
   production: {
     API_BASE_URL: 'https://nerakcos-1.onrender.com/api/',

@@ -69,7 +69,13 @@ def create_app(config_class=DevelopmentConfig):
     # Add static file serving for uploads
     @app.route('/uploads/<filename>')
     def uploaded_file(filename):
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'products')  # server/app/uploads/products
+        print(f"Looking for file in: {upload_dir}, filename: {filename}") 
+        try:
+            return send_from_directory(upload_dir, filename)
+        except FileNotFoundError:
+            print(f"File not found: {filename} in {upload_dir}") 
+            return "File not found", 404
 
     # Initialize default categories on first app request using signal
     def initialize_categories():
