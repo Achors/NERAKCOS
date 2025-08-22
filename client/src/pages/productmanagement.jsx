@@ -4,18 +4,20 @@ import { api, fetchApi } from '../api';
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [newProduct, setNewProduct] = useState({ 
-    name: '', 
-    price: '', 
-    stock: '', 
+  const [isEditing, setIsEditing] = useState(false); // Track edit mode
+  const [currentProductId, setCurrentProductId] = useState(null); // Track product being edited
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    stock: '',
     category: '',
-    images: [] 
+    images: [],
   });
 
   const categories = [
     { value: 'tote-bag', label: 'Tote Bag' },
     { value: 'backpack', label: 'Backpack' },
-    { value: 'hand-bag', label: 'Handbag' }
+    { value: 'hand-bag', label: 'Handbag' },
   ];
 
   useEffect(() => {
@@ -46,9 +48,48 @@ const ProductManagement = () => {
       });
       setProducts([...products, response]);
       setShowModal(false);
-      setNewProduct({ name: '', price: '', stock: '', category: '', images: [] });
+      resetForm();
     } catch (err) {
       console.error('Error adding product:', err.message, err.response?.data);
+    }
+  };
+
+  const handleEditProduct = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', newProduct.name);
+    formData.append('price', newProduct.price);
+    formData.append('stock', newProduct.stock);
+    formData.append('category', newProduct.category);
+    newProduct.images.forEach((image) => formData.append('images', image));
+
+    try {
+      const response = await fetchApi(api.products.update(currentProductId), {
+        method: 'PUT', // Assuming your API uses PUT for updates
+        body: formData,
+      });
+      setProducts(
+        products.map((product) =>
+          product.id === currentProductId ? response : product
+        )
+      );
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      console.error('Error updating product:', err.message, err.response?.data);
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      await fetchApi(api.products.delete(id), {
+        method: 'DELETE',
+      });
+      setProducts(products.filter((product) => product.id !== id));
+    } catch (err) {
+      console.error('Error deleting product:', err.message, err.response?.data);
     }
   };
 
@@ -56,8 +97,27 @@ const ProductManagement = () => {
     setNewProduct({ ...newProduct, images: Array.from(e.target.files) });
   };
 
+  const resetForm = () => {
+    setNewProduct({ name: '', price: '', stock: '', category: '', images: [] });
+    setIsEditing(false);
+    setCurrentProductId(null);
+  };
+
+  const handleEditClick = (product) => {
+    setNewProduct({
+      name: product.name,
+      price: product.price,
+      stock: product.stock,
+      category: product.category,
+      images: [], // Images are not pre-filled; user can re-upload if needed
+    });
+    setCurrentProductId(product.id);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
   const getCategoryLabel = (categoryValue) => {
-    const category = categories.find(cat => cat.value === categoryValue);
+    const category = categories.find((cat) => cat.value === categoryValue);
     return category ? category.label : categoryValue;
   };
 
@@ -67,7 +127,10 @@ const ProductManagement = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setIsEditing(false);
+              setShowModal(true);
+            }}
             className="bg-slate-700 text-white px-6 py-2 rounded-lg hover:bg-slate-800 transition-colors shadow-md"
           >
             Add Product
@@ -118,8 +181,18 @@ const ProductManagement = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">${product.price?.toFixed(2)}</td>
                   <td className="px-4 py-3 text-sm text-gray-900">{product.stock}</td>
                   <td className="px-4 py-3 text-sm space-x-2">
-                    <button className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
-                    <button className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                    <button
+                      onClick={() => handleEditClick(product)}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="text-red-600 hover:text-red-800 font-medium"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -131,9 +204,11 @@ const ProductManagement = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">Add New Product</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {isEditing ? 'Edit Product' : 'Add New Product'}
+                </h2>
               </div>
-              
+
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
@@ -208,7 +283,7 @@ const ProductManagement = () => {
                     type="button"
                     onClick={() => {
                       setShowModal(false);
-                      setNewProduct({ name: '', price: '', stock: '', category: '', images: [] });
+                      resetForm();
                     }}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
@@ -216,10 +291,10 @@ const ProductManagement = () => {
                   </button>
                   <button
                     type="submit"
-                    onClick={handleAddProduct}
+                    onClick={isEditing ? handleEditProduct : handleAddProduct}
                     className="px-4 py-2 text-sm font-medium text-white bg-slate-700 border border-transparent rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   >
-                    Add Product
+                    {isEditing ? 'Update Product' : 'Add Product'}
                   </button>
                 </div>
               </div>

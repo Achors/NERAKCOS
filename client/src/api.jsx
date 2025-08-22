@@ -13,7 +13,7 @@ const environment = process.env.NODE_ENV || 'development';
 // Export the appropriate config
 export const API_CONFIG = config[environment];
 
-// Use API_CONFIG.API_BASE_URL in the api object
+// API_CONFIG.API_BASE_URL in the api object
 export const api = {
   contact: { submit: () => `${API_CONFIG.API_BASE_URL}contact` },
   auth: {
@@ -28,6 +28,8 @@ export const api = {
   products: {
     list: () => `${API_CONFIG.API_BASE_URL}products`,
     create: () => `${API_CONFIG.API_BASE_URL}products`,
+    update: (id) => `${API_CONFIG.API_BASE_URL}products/${id}`,
+    delete: (id) => `${API_CONFIG.API_BASE_URL}products/${id}`,
   },
   categories: {
     list: () => `${API_CONFIG.API_BASE_URL}categories`,
