@@ -16,39 +16,28 @@ const TeamMember = ({ name, role, description, imageUrl }) => {
 const TeamSection = () => {
   const teamMembers = [
     {
-      name: "Alex Johnson",
+      name: "Karen",
       role: "Founder & CEO",
       description: "Leads the vision and strategy, driving innovation and growth.",
-      imageUrl: "https://via.placeholder.com/100", 
-    },
-    {
-      name: "Maria Lopez",
-      role: "Head of Design",
-      description: "Oversees creative direction and user experience design.",
-      imageUrl: "https://via.placeholder.com/100", 
-    },
-    {
-      name: "Samir Patel",
-      role: "Tech Lead",
-      description: "Manages development and ensures robust tech solutions.",
-      imageUrl: "https://via.placeholder.com/100", 
-    },
-    {
-      name: "Emma Chen",
-      role: "Marketing Partner",
-      description: "Handles branding and outreach to grow our community.",
-      imageUrl: "https://via.placeholder.com/100", 
+      imageUrl: "/karen.png",
     },
   ];
 
   return (
-    <section className="py-12 bg-slate-100">
+    <section className="py-12 bg-stone-100 rounded-lg shadow-lg">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Our Team</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 gap-8">
           {teamMembers.map((member, index) => (
             <TeamMember key={index} {...member} />
           ))}
+        </div>
+        <div className="mt-12 text-center">
+          <h3 className="text-2xl font-garamond font-semibold italic mb-2 border-b-2 border-gray-800 inline-block">Conclusion:</h3>
+          <p className="text-lg italic text-gray-800">
+            Support us to generate a great impact in terms of recycling and transformation <br />
+            of fashion, contributing work, awareness and values...
+          </p>
         </div>
       </div>
     </section>

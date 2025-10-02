@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
-import { api, fetchApi } from '../api';
+import { api, fetchApi, API_CONFIG } from '../api';
 import { useSearch } from '../pages/searchcontext';
 import { FaSearch } from 'react-icons/fa';
 
@@ -16,12 +16,14 @@ const Shop = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching products from:', api.products.list());
         const productsData = await fetchApi(api.products.list());
+        console.log('Products fetched:', productsData);
         setProducts(productsData.map(product => ({ ...product, currentSlide: 0 })));
         const categoriesData = await fetchApi(api.categories.list());
         setCategories(categoriesData);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('Error fetching data:', err.message, err);
       }
     };
     fetchData();
@@ -40,7 +42,7 @@ const Shop = () => {
       const response = await fetchApi(api.orders.create(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId, quantity: 1 }), // Match backend field name
+        body: JSON.stringify({ product_id: productId, quantity: 1 }),
       });
       alert('Item added to cart! Admin will see this order.');
     } catch (err) {
@@ -130,8 +132,8 @@ const Shop = () => {
               className="block w-1/4 p-2 border rounded"
             >
               <option value="">All Prices</option>
-              <option value="under100">Under $100</option>
-              <option value="100-200">$100 - $200</option>
+              <option value="under100">Under €100</option>
+              <option value="100-200">€100 - €200</option>
             </select>
           </div>
         )}
@@ -143,50 +145,67 @@ const Shop = () => {
             filteredProducts.map((product) => (
               <div key={product.id} className="bg-white p-4 rounded shadow-md">
                 <div className="relative w-full h-64 overflow-hidden">
-                  <div
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{ transform: `translateX(-${(product.currentSlide || 0) * 100}%)` }}
-                  >
-                    {product.image_urls.map((img, index) => (
-                      <img
-                        key={index}
-                        src={img}
-                        alt={`${product.name} angle ${index + 1}`}
-                        className="w-full h-64 object-cover"
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={() =>
-                      setProducts((prev) =>
-                        prev.map((p) =>
-                          p.id === product.id
-                            ? { ...p, currentSlide: (p.currentSlide || 0) - 1 < 0 ? product.image_urls.length - 1 : (p.currentSlide || 0) - 1 }
-                            : p
-                        )
-                      )
-                    }
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-black p-2 rounded-full"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    onClick={() =>
-                      setProducts((prev) =>
-                        prev.map((p) =>
-                          p.id === product.id
-                            ? { ...p, currentSlide: (p.currentSlide || 0) + 1 >= product.image_urls.length ? 0 : (p.currentSlide || 0) + 1 }
-                            : p
-                        )
-                      )
-                    }
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-white p-2 rounded-full"
-                  >
-                    ›
-                  </button>
-                </div>
+  <div
+    className="flex transition-transform duration-300 ease-in-out"
+    style={{ transform: `translateX(-${(product.currentSlide || 0) * 100}%)`, width: '100%' }}  // Container width is 100% of one slide
+  >
+    {product.image_urls?.length > 0 ? (
+      product.image_urls.map((img, index) => {
+        const imgUrl = `${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}/static/${img.replace('static/', '')}`;
+        return (
+          <img
+            key={index}
+            src={imgUrl}
+            alt={`${product.name} angle ${index + 1}`}
+            className="w-full h-64 object-contain flex-shrink-0"  // Each image is 100% width, no shrinking
+            onError={(e) => {
+              console.log(`Image load failed: ${e.target.src}`);
+              e.target.src = 'https://via.placeholder.com/150';
+            }}
+          />
+        );
+      })
+    ) : (
+      <div className="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-600">
+        No Images
+      </div>
+    )}
+  </div>
+  {product.image_urls?.length > 1 && (
+    <>
+      <button
+        onClick={() =>
+          setProducts((prev) =>
+            prev.map((p) =>
+              p.id === product.id
+                ? { ...p, currentSlide: (p.currentSlide || 0) - 1 < 0 ? product.image_urls.length - 1 : (p.currentSlide || 0) - 1 }
+                : p
+            )
+          )
+        }
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-black p-2 rounded-full"
+      >
+        ‹
+      </button>
+      <button
+        onClick={() =>
+          setProducts((prev) =>
+            prev.map((p) =>
+              p.id === product.id
+                ? { ...p, currentSlide: (p.currentSlide || 0) + 1 >= product.image_urls.length ? 0 : (p.currentSlide || 0) + 1 }
+                : p
+            )
+          )
+        }
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-slate-300 text-white p-2 rounded-full"
+      >
+        ›
+      </button>
+    </>
+  )}
+</div>
                 <h3 className="text-lg font-montserrat mt-2">{product.name}</h3>
-                <p className="text-gray-600 font-montserrat">${product.price.toFixed(2)}</p>
+                <p className="text-gray-600 font-montserrat">€{product.price.toFixed(2)}</p>
                 <button
                   onClick={() => handleAddToCart(product.id)}
                   className="mt-2 w-full bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-900 transition"

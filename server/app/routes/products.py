@@ -25,8 +25,7 @@ def save_uploaded_file(file):
             file.save(filepath)
             print(f"File saved to {filepath}")  # Debug log
             # Use environment variable or default to local URL
-            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
-            return f'{base_url}/uploads/{filename}'
+            return f'static/uploads/products/{filename}'
         except Exception as e:
             print(f"Error saving file: {e}")
             return None
