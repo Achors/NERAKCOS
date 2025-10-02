@@ -91,7 +91,7 @@ const Collections = () => {
                     ))}
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-slate-0 bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
+                <div className="absolute inset-0 bg-slate-0 bg-opacity-0 group-hover:bg-opacity-8 0 transition flex items-center justify-center">
                   <Link
                     to={`/shop?category=${categoryId}`}
                     className="text-black text-lg font-semibold opacity-0 group-hover:opacity-100 transition"
