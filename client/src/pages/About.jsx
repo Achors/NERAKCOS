@@ -19,15 +19,15 @@ const About = () => {
                   alt="Company Background"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center">
+                <div className="relative z-10 min-h-[80vh] flex flex-col items-center text-center p-6 rounded-lg">
                   <div className="text-center px-4 animate-slideIn">
-                    <h2 className="text-4xl font-montserrat text-black mb-6 drop-shadow-lg">Company Story</h2>
-                    <p className="text-lg font-montserrat text-black leading-relaxed drop-shadow-lg">
-                      NERAKCOS emerged gracefully.
-                      <br />
-                      Redefines luxury with purpose.
-                      <br />
-                      Blends high fashion and sustainability innovatively.
+                    <h2 className="text-4xl font-garamond text-black mb-6 drop-shadow-lg italic font-bold"> "What We Do </h2>
+                    <p className="text-lg font- text-black leading-relaxed drop-shadow-lg">
+                      Bags and accessories designed to be durable and timeless, 
+                      <br /> thus avoiding planned obsolescence. We want our products  
+                      
+                      <br />to accompany you for a long time, becoming beloved pieces full of history.
+                                   
                     </p>
                   </div>
                   {/* <div className="w-full animate-slideUp">

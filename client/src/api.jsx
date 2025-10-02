@@ -1,9 +1,11 @@
+
+
 const config = {
   development: {
-    API_BASE_URL: 'http://localhost:5000/api/',
+    API_BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/',
   },
   production: {
-    API_BASE_URL: 'https://nerakcos-1.onrender.com/api/',
+    API_BASE_URL: import.meta.env.VITE_API_URL || 'https://nerakcos-1.onrender.com/api/',
   },
 };
 
@@ -12,6 +14,7 @@ const environment = process.env.NODE_ENV || 'development';
 
 // Export the appropriate config
 export const API_CONFIG = config[environment];
+
 
 // API_CONFIG.API_BASE_URL in the api object
 export const api = {

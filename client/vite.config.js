@@ -6,4 +6,14 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react()],
   tailwindcss,
+  base: '/',
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://nerakcos-1.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })

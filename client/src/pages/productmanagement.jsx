@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api, fetchApi } from '../api';
+import { api, fetchApi, API_CONFIG } from '../api'; // Import API_CONFIG to fix the ReferenceError
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -24,6 +24,7 @@ const ProductManagement = () => {
     const fetchProducts = async () => {
       try {
         const data = await fetchApi(api.products.list());
+        console.log('Fetched products:', data); // Debug log to check image_urls
         setProducts(data);
       } catch (err) {
         console.error('Error fetching products:', err.message, err.response?.data);
@@ -159,10 +160,13 @@ const ProductManagement = () => {
                       {product.image_urls?.slice(0, 3).map((img, index) => (
                         <img
                           key={index}
-                          src={img}
+                          src={`${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}${img}`}
                           alt={`${product.name} angle ${index + 1}`}
                           className="w-12 h-12 object-cover rounded-md border"
-                          onError={(e) => console.log(`Image load failed: ${e.target.src}`)}
+                          onError={(e) => {
+                            console.log(`Image load failed: ${e.target.src}`);
+                            e.target.src = '/fallback-image.jpg'; // Add a fallback image in your public/ folder
+                          }}
                         />
                       ))}
                       {product.image_urls?.length > 3 && (
@@ -240,7 +244,7 @@ const ProductManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (€)</label>
                   <input
                     type="number"
                     value={newProduct.price}

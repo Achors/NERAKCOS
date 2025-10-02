@@ -1,4 +1,5 @@
-from flask import Flask, send_from_directory
+from fileinput import filename
+from flask import Flask, app, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -67,15 +68,19 @@ def create_app(config_class=DevelopmentConfig):
         return user  # Return User object
 
     # Add static file serving for uploads
-    @app.route('/uploads/<filename>')
-    def uploaded_file(filename):
-        upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'products')  # server/app/uploads/products
-        print(f"Looking for file in: {upload_dir}, filename: {filename}") 
-        try:
-            return send_from_directory(upload_dir, filename)
-        except FileNotFoundError:
-            print(f"File not found: {filename} in {upload_dir}") 
-            return "File not found", 404
+    # @app.route('/uploads/<filename>')
+    # def uploaded_file(filename):
+    #     upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'products')  # server/app/uploads/products
+    #     print(f"Looking for file in: {upload_dir}, filename: {filename}") 
+    #     try:
+    #         return send_from_directory(upload_dir, filename)
+    #     except FileNotFoundError:
+    #         print(f"File not found: {filename} in {upload_dir}") 
+    #         return "File not found", 404
+
+    @app.route('/static/uploads/products/<path:filename>')
+    def serve_uploaded_file(filename):
+        return send_from_directory(os.path.join(app.root_path, 'static', 'uploads', 'products'), filename)
 
     # Initialize default categories on first app request using signal
     def initialize_categories():
