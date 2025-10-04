@@ -21,14 +21,15 @@ const Home = () => {
   }, [instagramPosts.length]);
 
   return (
-    <div className="min-h-screen bg-slate-100 scroll-smooth">
+    <div className="min-h-screen bg-stone-200 scroll-smooth">
       <Navbar />
-      <section id="hero" className="relative h-screen">
-        <picture className="w-full h-full">
+      <section id="hero" className="relative min-h-screen bg-cover bg-center" style={{ backgroundImage: `url(/Home.png)` }}>
+        {/* Optional video background with fallback */}
+        <video autoPlay muted loop className="w-full h-full object-cover absolute inset-0 hidden md:block" style={{ zIndex: -1 }}>
           <source src="/background_video.mp4" type="video/mp4" />
-          <img src="/Home.png" alt="Hero Background" className="w-full h-full object-cover" />
-        </picture>
-        <div className="absolute inset-0 bg-slate bg-opacity-40 flex items-center justify-center">
+          Your browser does not support the video tag.
+        </video>
+        <div className="absolute inset-0 bg-slate bg-opacity-40 flex items-center justify-center min-h-screen">
           <div className="text-center text-black">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">Elevate Your Style</h1>
             <p className="text-lg md:text-xl mb-8">Discover the latest in fashion bags</p>
@@ -39,7 +40,7 @@ const Home = () => {
         </div>
       </section>
       <Collections />
-      <section id="instagram" className="py-16 px-4 md:px-8 bg-gray-100">
+      <section id="instagram" className="py-16 px-4 md:px-8 bg-stone-200">
         <h2 className="text-3xl font-bold text-center mb-12">Follow Us on Instagram</h2>
         <div className="relative max-w-4xl mx-auto">
           <div className="overflow-hidden">
