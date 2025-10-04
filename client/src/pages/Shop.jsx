@@ -79,7 +79,7 @@ const Shop = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-stone-200 flex flex-col">
       <nav className="bg-slate-100 p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center relative">
           <div className="flex-shrink-0">
@@ -113,7 +113,7 @@ const Shop = () => {
           </div>
         </div>
         {showFilters && (
-          <div className="container mx-auto mt-4 bg-white p-4 rounded shadow-md">
+          <div className="container mx-auto mt-4 bg-stone-100 p-4 rounded shadow-md">
             <select
               name="category"
               value={filters.category}
@@ -143,7 +143,7 @@ const Shop = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-              <div key={product.id} className="bg-white p-4 rounded shadow-md">
+              <div key={product.id} className="bg-stone-200 p-4 rounded shadow-md">
                 <div className="relative w-full h-64 overflow-hidden">
   <div
     className="flex transition-transform duration-300 ease-in-out"
@@ -157,7 +157,7 @@ const Shop = () => {
             key={index}
             src={imgUrl}
             alt={`${product.name} angle ${index + 1}`}
-            className="w-full h-64 object-contain flex-shrink-0"  // Each image is 100% width, no shrinking
+            className="w-full h-64 object-cover flex-shrink-0"  // Each image is 100% width, no shrinking
             onError={(e) => {
               console.log(`Image load failed: ${e.target.src}`);
               e.target.src = 'https://via.placeholder.com/150';

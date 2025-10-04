@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { api, fetchApi } from '../api';
+import { api, fetchApi, API_CONFIG } from '../api';
 
 const Collections = () => {
   const [categoryImages, setCategoryImages] = useState({});
@@ -11,18 +11,21 @@ const Collections = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching products from:', api.products.list());
         const productsData = await fetchApi(api.products.list());
+        console.log('Products fetched:', productsData);
         const products = productsData.map(product => ({ ...product, currentSlide: 0 }));
         setProducts(products);
 
-        // Group by category_id and take first three images
+        // Group by category_id and take first three images with full URL
         const grouped = products.reduce((acc, product) => {
           const categoryId = product.category_id || 'Uncategorized';
           if (!acc[categoryId]) {
             acc[categoryId] = [];
           }
           if (acc[categoryId].length < 3 && product.image_urls && product.image_urls.length > 0) {
-            acc[categoryId].push(product.image_urls[0]); // Use first image
+            const imgUrl = `${API_CONFIG.API_BASE_URL.replace(/\/api\/$/, '')}/static/${product.image_urls[0].replace('static/', '')}`;
+            acc[categoryId].push(imgUrl); // Use first image with full path
           }
           return acc;
         }, {});
@@ -78,20 +81,20 @@ const Collections = () => {
                 <div className="relative w-full h-96 overflow-hidden">
                   <div
                     className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                    style={{ transform: `translateX(-${currentSlide * 100}%)`, width: '100%' }}  // Width for one slide
                   >
                     {images.map((img, index) => (
                       <img
                         key={index}
                         src={img}
                         alt={`${categoryName} image ${index + 1}`}
-                        className="w-full h-96 object-cover rounded-lg min-w-full border border-black border-opacity-100"
-                        onError={(e) => { e.target.src = `/https://via.placeholder.com/400x500?text=${categoryName}`; }}
+                        className="w-full h-96 object-cover flex-shrink-0 rounded-lg border border-black border-opacity-100"  // Changed to object-cover
+                        onError={(e) => { e.target.src = `https://via.placeholder.com/400x500?text=${categoryName}`; }}
                       />
                     ))}
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-slate-0 bg-opacity-0 group-hover:bg-opacity-8 0 transition flex items-center justify-center">
+                <div className="absolute inset-0 bg-slate-00 bg-opacity-0 group-hover:bg-opacity-100 transition flex items-center justify-center">
                   <Link
                     to={`/shop?category=${categoryId}`}
                     className="text-black text-lg font-semibold opacity-0 group-hover:opacity-100 transition"
