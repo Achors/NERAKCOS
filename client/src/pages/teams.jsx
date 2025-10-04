@@ -3,12 +3,12 @@ import React from 'react';
 const TeamMember = ({ name, role, description, imageUrl }) => {
   return (
     <div className="flex flex-col items-center text-center p-4">
-      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300">
+      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 sm:w-32 sm:h-32">
         <img src={imageUrl} alt={`${name}'s profile`} className="w-full h-full object-cover" />
       </div>
-      <h3 className="mt-2 text-lg font-semibold">{name}</h3>
-      <p className="text-sm text-gray-600">{role}</p>
-      <p className="mt-1 text-sm text-gray-700">{description}</p>
+      <h3 className="mt-2 text-lg font-semibold sm:text-xl">{name}</h3>
+      <p className="text-sm text-gray-600 sm:text-base">{role}</p>
+      <p className="mt-1 text-sm text-gray-700 sm:text-base">{description}</p>
     </div>
   );
 };
