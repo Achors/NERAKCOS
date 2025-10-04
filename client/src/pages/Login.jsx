@@ -11,6 +11,29 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  const handleGoogleLogin = (response) => {
+    const token = response.credential;
+    fetchApi('http://localhost:5000/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    .then((data) => {
+      localStorage.setItem('jwt_token', data.access_token);
+      localStorage.setItem('user', JSON.stringify({ name: data.name, email: data.email, role: data.role }));
+      if (data.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+      setError('');
+    })
+    .catch((err) => {
+      setError(err.message || 'Google login failed');
+      console.error('Google login error:', err);
+    });
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
@@ -85,6 +108,20 @@ const Login = () => {
             >
               Sign In
             </button>
+            <div className="my-4 text-center">or</div>
+            <div id="g_id_onload"
+                 data-client_id="YOUR_GOOGLE_CLIENT_ID"  // Replace with your Google Client ID
+                 data-callback="handleGoogleLogin"
+                 data-auto_prompt="false">
+            </div>
+            <div className="g_id_signin"
+                 data-type="standard"
+                 data-size="large"
+                 data-theme="outline"
+                 data-text="sign_in_with"
+                 data-shape="rectangular"
+                 data-logo_alignment="left">
+            </div>
             <Link to="/register" className="w-full mt-2 text-gray-600 hover:text-gray-800 text-center block">
               Don’t have an account? Register
             </Link>

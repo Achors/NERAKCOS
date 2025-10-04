@@ -8,7 +8,29 @@ const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleGoogleLogin = (response) => {
+    const token = response.credential;
+    fetchApi('http://localhost:5000/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    .then((data) => {
+      localStorage.setItem('jwt_token', data.access_token);
+      localStorage.setItem('adminUser', JSON.stringify({ name: data.name, email: data.email, role: data.role }));
+      if (data.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/login'); // Redirect non-admins to regular login
+      }
+    })
+    .catch((err) => {
+      alert('Google login failed or not an admin');
+      console.error('Google login error:', err);
+    });
+  };
+
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await fetchApi(api.auth.login(), {
@@ -20,7 +42,7 @@ const AdminLogin = () => {
       if (response.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
-        navigate('/login'); 
+        navigate('/login');
       }
     } catch (err) {
       alert('Invalid credentials or not an admin');
@@ -32,7 +54,7 @@ const AdminLogin = () => {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Navbar /> {/* Navbar at the top, full width */}
       <div className="flex-1 flex items-center justify-center py-12 px-4">
-        <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <form onSubmit={handleEmailLogin} className="bg-white p-6 rounded shadow-lg w-full max-w-md">
           <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
           <input
             type="email"
@@ -58,6 +80,20 @@ const AdminLogin = () => {
           >
             Login
           </button>
+          <div className="my-4 text-center">or</div>
+          <div id="g_id_onload"
+               data-client_id="YOUR_GOOGLE_CLIENT_ID"  // Replace with your Google Client ID
+               data-callback="handleGoogleLogin"
+               data-auto_prompt="false">
+          </div>
+          <div className="g_id_signin"
+               data-type="standard"
+               data-size="large"
+               data-theme="outline"
+               data-text="sign_in_with"
+               data-shape="rectangular"
+               data-logo_alignment="left">
+          </div>
         </form>
       </div>
       <Footer /> {/* Footer at the bottom */}

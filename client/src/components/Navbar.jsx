@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
-import { useSearch } from '../pages/searchcontext';
+import { useSearch } from '../context/searchcontext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
