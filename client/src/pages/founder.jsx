@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 const CommitmentItem = ({ title, description, imageUrl, isMission }) => {
   return (
-    <div className="flex items-center text-center p-6">
-      <div className="text-left flex-1">
+    <div className="flex flex-col md:flex-row items-center text-center md:text-left p-6">
+      <div className="flex-1">
         <h3 className="text-2xl font-semibold italic text-black">{title}</h3>
         <p className="mt-2 text-lg leading-relaxed text-black">
           {isMission ? (
@@ -22,7 +22,7 @@ const CommitmentItem = ({ title, description, imageUrl, isMission }) => {
           )}
         </p>
       </div>
-      <div className="w-52 h-52 rounded-full overflow-hidden ml-6">
+      <div className="w-52 h-52 rounded-full overflow-hidden ml-0 md:ml-6 mt-4 md:mt-0">
         <img src={imageUrl} alt={`${title} image`} className="w-full h-full object-cover border-4 border-gray-800" />
       </div>
     </div>
@@ -50,8 +50,8 @@ const FoundersStorySection = () => {
             </div>
             <h2 className="mt-4 text-4xl font-garamond mb-6 text-black italic font-bold">Our Story</h2>
           </div>
-          <div className="flex items-center">
-            <div className="w-52 h-52 rounded-full overflow-hidden mr-6">
+          <div className="flex flex-col md:flex-row items-center">
+            <div className="w-52 h-52 rounded-full overflow-hidden mr-0 md:mr-6 mb-4 md:mb-0">
               <img src="/madrid.png" alt="Textile work" className="w-full h-full object-cover border-4 border-gray-800" />
             </div>
             <div className="text-left flex-1">
@@ -66,9 +66,9 @@ const FoundersStorySection = () => {
         {/* Commitment Section with Swapping Mission and Vision */}
         <div className="animate-fadeIn">
           <h2 className="text-4xl font-garamond mb-6 text-black italic">Commitment</h2>
-          <div className="max-w-2xl mx-auto transition-opacity duration-500" style={{ minHeight: '500px' }}>
+          <div className="max-w-2xl mx-auto transition-opacity duration-500">
             {currentCommitment === 'mission' ? (
-              <div className="opacity-100 transition-opacity duration-500 flex items-center" style={{ minHeight: '400px' }}>
+              <div className="opacity-100 transition-opacity duration-500">
                 <CommitmentItem
                   title="Our Mission"
                   description=""
@@ -77,7 +77,7 @@ const FoundersStorySection = () => {
                 />
               </div>
             ) : (
-              <div className="opacity-100 transition-opacity duration-500 flex items-center" style={{ minHeight: '400px' }}>
+              <div className="opacity-100 transition-opacity duration-500">
                 <CommitmentItem
                   title="Our Vision"
                   description="Sustainable brand of bags and accessories that address the environmental impact of the fashion industry."
