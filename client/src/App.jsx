@@ -13,6 +13,8 @@ import { CartProvider } from './context/CartContext';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import BlogPage from './pages/Blog';
+import Checkout from './pages/checkout';
+import OrderSuccess from './pages/ordersuccess.jsx';
 
 const App = () => {
   return (
@@ -29,6 +31,8 @@ const App = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
             <Route
               path="/admin/*"
               element={

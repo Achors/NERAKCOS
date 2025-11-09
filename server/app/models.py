@@ -102,7 +102,7 @@ class Product(db.Model):
 class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
@@ -111,6 +111,40 @@ class Order(db.Model):
     
     # Add relationship to product
     product = db.relationship('Product', backref='orders')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'name': self.product.name,
+            'price': float(self.product.price),
+            'quantity': self.quantity,
+            'total': float(self.total_price),
+            'image': self.product.get_image_urls()[0] if self.product.get_image_urls() else None,
+            'status': self.status
+        }
+
+class GuestCart(db.Model):
+    __tablename__ = 'guest_cart'
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.String(80), nullable=False, index=True)
+
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+
+    product = db.relationship('Product', backref='guest_items')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'name': self.product.name,
+            'price': float(self.product.price),
+            'quantity': self.quantity,
+            'total': float(self.product.price * self.quantity),
+            'image': self.product.get_image_urls()[0] if self.product.get_image_urls() else None
+        }
 
 class CollaborationRequest(db.Model):
     __tablename__ = 'collaboration_requests'

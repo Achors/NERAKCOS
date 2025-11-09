@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import { api, fetchApi } from '../api';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useCart } from '../context/CartContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -11,28 +12,38 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleGoogleLogin = (response) => {
-    const token = response.credential;
-    fetchApi('http://localhost:5000/api/auth/google', {
+
+  // Get loadCart from CartContext
+  const { loadCart } = useCart();
+  
+
+ 
+
+ const handleGoogleLogin = async (response) => {
+  const token = response.credential;
+  try {
+    const data = await fetchApi('http://localhost:5000/api/auth/google', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
-    })
-    .then((data) => {
-      localStorage.setItem('jwt_token', data.access_token);
-      localStorage.setItem('user', JSON.stringify({ name: data.name, email: data.email, role: data.role }));
-      if (data.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/');
-      }
-      setError('');
-    })
-    .catch((err) => {
-      setError(err.message || 'Google login failed');
-      console.error('Google login error:', err);
     });
-  };
+
+    localStorage.setItem('jwt_token', data.access_token);
+    localStorage.setItem('user', JSON.stringify({ name: data.name, email: data.email, role: data.role }));
+
+    // MERGE GUEST CART
+    await loadCart();
+
+    if (data.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/');
+    }
+    setError('');
+  } catch (err) {
+    setError(err.message || 'Google login failed');
+  }
+};
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,28 +55,36 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
-      return;
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    setError('Please fill in all fields');
+    return;
+  }
+
+  try {
+    const response = await fetchApi(api.auth.login(), {
+      method: 'POST',
+      body: JSON.stringify({ email: formData.email, password: formData.password }),
+    });
+
+    // Save user session
+    localStorage.setItem('jwt_token', response.access_token);
+    localStorage.setItem('user', JSON.stringify({ name: response.name, email: formData.email, role: response.role }));
+
+    // MERGE GUEST CART
+    await loadCart();
+
+    // Redirect
+    if (response.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/');
     }
-    try {
-      const response = await fetchApi(api.auth.login(), {
-        method: 'POST',
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
-      });
-      localStorage.setItem('jwt_token', response.access_token);
-      localStorage.setItem('user', JSON.stringify({ name: response.name, email: formData.email, role: response.role }));
-      if (response.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/');
-      }
-      setError('');
-    } catch (err) {
-      setError(err.message || 'Login failed');
-    }
-  };
+    setError('');
+  } catch (err) {
+    setError(err.message || 'Login failed');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-between">

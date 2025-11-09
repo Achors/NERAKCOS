@@ -1,9 +1,60 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from app.models import Order, Product, User
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models import Order, Product, User, GuestCart
+import uuid
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token 
 
 bp = Blueprint('orders', __name__)
+
+# =============================
+# 1. GUEST CART (NO LOGIN)
+# =============================
+@bp.route('/guest-cart', methods=['POST'])
+def add_to_guest_cart():
+    try:
+        data = request.get_json()
+        if not data or 'product_id' not in data or 'quantity' not in data:
+            return jsonify({"error": "Missing product_id or quantity"}), 400
+
+        product_id = data['product_id']
+        quantity = int(data['quantity'])
+
+        product = Product.query.get(product_id)
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
+        if product.stock < quantity:
+            return jsonify({"error": "Insufficient stock"}), 400
+
+        # Generate or get session ID (like a guest ID)
+        session_id = request.cookies.get('guest_session')
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        
+        # Check if item already in guest cart
+        existing = GuestCart.query.filter_by(session_id=session_id, product_id=product_id).first()
+        if existing:
+            existing.quantity += quantity
+        else:
+            guest_item = GuestCart(
+                session_id=session_id,
+                product_id=product_id,
+                quantity=quantity
+            )
+            db.session.add(guest_item)
+        
+        db.session.commit()
+
+        # Set cookie (expires in 30 days)
+        response = jsonify({
+            "message": "Added to cart (guest)",
+            "cart_count": get_guest_cart_count(session_id)
+        })
+        response.set_cookie('guest_session', session_id, max_age=30*24*60*60, httponly=True)
+        return response, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @bp.route('/orders', methods=['POST'])
 @jwt_required()
