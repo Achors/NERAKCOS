@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from flask import signals
 from config import DevelopmentConfig, ProductionConfig
 import os
@@ -12,6 +13,7 @@ import os
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
+mail = Mail()
 
 def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
@@ -23,7 +25,18 @@ def create_app(config_class=DevelopmentConfig):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": os.environ.get('FRONTEND_URL', '*')}}, supports_credentials=True)
+    mail.init_app(app)
+
+    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+    CORS(
+        app, 
+        resources={r"/api/*": {
+            "origins": [frontend_url],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }}
+    )
 
     # Import blueprints after app initialization
     from app.routes.contact import bp as contact_bp
@@ -36,6 +49,7 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes.collaborate import bp as collaborate_bp
     from app.routes.categories import bp as categories_bp, initialize_default_categories
     from app.routes.upload import upload_bp, init_upload
+    from app.routes.cart import bp as cart_bp
 
     app.register_blueprint(contact_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
@@ -43,6 +57,7 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(blog_bp, url_prefix='/api')
     app.register_blueprint(home_bp)  # No /api prefix for home
     app.register_blueprint(orders_bp, url_prefix='/api')
+    app.register_blueprint(cart_bp, url_prefix='/api')
     app.register_blueprint(profile_bp, url_prefix='/api')
     app.register_blueprint(collaborate_bp, url_prefix='/api')
     app.register_blueprint(categories_bp, url_prefix='/api')

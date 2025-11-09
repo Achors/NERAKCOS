@@ -54,6 +54,16 @@ export const api = {
     delete: (id) => `${API_CONFIG.API_BASE_URL}blog/${id}`,
     upload: () => `${API_CONFIG.API_BASE_URL}blog/upload`,
   },
+
+  cart: {
+    list: () => `${API_CONFIG.API_BASE_URL}cart`,
+    add: () => `${API_CONFIG.API_BASE_URL}cart`,
+    update: (id) => `${API_CONFIG.API_BASE_URL}cart/${id}`,
+    remove: (id) => `${API_CONFIG.API_BASE_URL}cart/${id}`,
+  },
+
+  // Checkout (uses orders.create)
+  checkout: () => `${API_CONFIG.API_BASE_URL}checkout`,
 };
 
 export const fetchApi = async (url, options = {}) => {
@@ -73,6 +83,7 @@ export const fetchApi = async (url, options = {}) => {
   const response = await fetch(url, {
     ...options,
     headers,
+    credentials: 'include',
   });
 
   const data = await response.json();
