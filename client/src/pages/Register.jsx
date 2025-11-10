@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
@@ -21,26 +21,78 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone) {
-      setError('Please fill in all fields');
-      return;
+  e.preventDefault();
+
+  if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone) {
+    setError('Please fill in all fields');
+    return;
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  try {
+    await fetchApi(api.auth.register(), {
+      method: 'POST',
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+      }),
+    });
+
+    setError('');
+    alert('Thanks for registering! Please check your email to verify your account.');
+    navigate('/login'); // Optional, send them to login page
+  } catch (err) {
+    setError(err.message || 'Registration failed');
+  }
+};
+
+  const handleGoogleRegister = async (response) => {
+  const token = response.credential;
+  try {
+    const data = await fetchApi('http://localhost:5000/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    // Save backend-issued JWT and user info
+    localStorage.setItem('jwt_token', data.access_token);
+    localStorage.setItem('user', JSON.stringify({
+      name: data.name,
+      email: data.email,
+      role: data.role
+    }));
+
+    // Redirect based on role
+    if (data.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/');
     }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    try {
-      await fetchApi(api.auth.register(), {
-        method: 'POST',
-        body: JSON.stringify({ email: formData.email, password: formData.password, name: formData.name }),
-      });
-      setError('');
-      navigate('/login');
-    } catch (err) {
-      setError(err.message || 'Registration failed');
-    }
-  };
+    setError('');
+  } catch (err) {
+    setError(err.message || 'Google registration failed');
+  }
+};
+useEffect(() => {
+  /* global google */
+  if (window.google) {
+    google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: handleGoogleRegister,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleRegisterDiv'),
+      { theme: 'outline', size: 'large' }
+    );
+  }
+}, []);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-between">
@@ -115,6 +167,8 @@ const Register = () => {
             >
               Create Account
             </button>
+            <div className="my-2 text-center">or</div>
+            <div id="googleRegisterDiv" className="flex justify-center"></div>
             <Link to="/login" className="w-full mt-2 text-gray-600 hover:text-gray-800 text-center block">
               Already have an account? Login
             </Link>

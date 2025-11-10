@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
@@ -11,87 +11,105 @@ const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-
-
-  // Get loadCart from CartContext
   const { loadCart } = useCart();
-  
 
- 
+  const handleGoogleLogin = async (response) => {
+    const token = response.credential;
+    try {
+      const data = await fetchApi('http://localhost:5000/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
 
- const handleGoogleLogin = async (response) => {
-  const token = response.credential;
-  try {
-    const data = await fetchApi('http://localhost:5000/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    });
+      // Save your backend-issued JWT and user info
+      localStorage.setItem('jwt_token', data.access_token);
+      localStorage.setItem('user', JSON.stringify({
+        name: data.name,
+        email: data.email,
+        role: data.role
+      }));
 
-    localStorage.setItem('jwt_token', data.access_token);
-    localStorage.setItem('user', JSON.stringify({ name: data.name, email: data.email, role: data.role }));
+      // Merge guest cart
+      await loadCart();
 
-    // MERGE GUEST CART
-    await loadCart();
-
-    if (data.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else {
-      navigate('/');
+      if (data.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Google login failed');
     }
-    setError('');
-  } catch (err) {
-    setError(err.message || 'Google login failed');
-  }
-};
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!formData.email || !formData.password) {
-    setError('Please fill in all fields');
-    return;
-  }
-
-  try {
-    const response = await fetchApi(api.auth.login(), {
-      method: 'POST',
-      body: JSON.stringify({ email: formData.email, password: formData.password }),
-    });
-
-    // Save user session
-    localStorage.setItem('jwt_token', response.access_token);
-    localStorage.setItem('user', JSON.stringify({ name: response.name, email: formData.email, role: response.role }));
-
-    // MERGE GUEST CART
-    await loadCart();
-
-    // Redirect
-    if (response.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else {
-      navigate('/');
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
     }
-    setError('');
-  } catch (err) {
-    setError(err.message || 'Login failed');
-  }
-};
+
+    try {
+      const response = await fetchApi(api.auth.login(), {
+        method: 'POST',
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      // Save user session
+      localStorage.setItem('jwt_token', response.access_token);
+      localStorage.setItem('user', JSON.stringify({
+        name: response.name,
+        email: formData.email,
+        role: response.role
+      }));
+
+      // Merge guest cart
+      await loadCart();
+
+      if (response.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Login failed');
+    }
+  };
+
+  // ✅ Initialize Google button correctly
+  useEffect(() => {
+    /* global google */
+    if (window.google) {
+      google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleGoogleLogin,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('googleSignInDiv'),
+        { theme: 'outline', size: 'large' }
+      );
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-between">
       <Navbar />
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 sm:p-8">
-          <h2 className="text-3xl font-montserrat text-center mb-6 text-gray-800">Client Sign In</h2>
+          <h2 className="text-3xl font-montserrat text-center mb-6 text-gray-800">Sign In</h2>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -127,20 +145,10 @@ const Login = () => {
             >
               Sign In
             </button>
-            <div className="my-4 text-center">or</div>
-            <div id="g_id_onload"
-                 data-client_id="YOUR_GOOGLE_CLIENT_ID"  // Replace with your Google Client ID
-                 data-callback="handleGoogleLogin"
-                 data-auto_prompt="false">
-            </div>
-            <div className="g_id_signin"
-                 data-type="standard"
-                 data-size="large"
-                 data-theme="outline"
-                 data-text="sign_in_with"
-                 data-shape="rectangular"
-                 data-logo_alignment="left">
-            </div>
+            <div className="my-1 text-center">or</div>
+
+            {/* ✅ Placeholder for Google Sign-In button */}
+            <div id="googleSignInDiv" className="flex justify-center"></div>
             <Link to="/register" className="w-full mt-2 text-gray-600 hover:text-gray-800 text-center block">
               Don’t have an account? Register
             </Link>

@@ -210,7 +210,7 @@ const Shop = () => {
 
                   <button
                     onClick={() => addToCart(product.id)}
-                    className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-md hover:shadow-lg"
+                    className="p-3 bg-transparent border border-black text-black rounded-full hover:bg-black hover:text-white transition shadow-md hover:shadow-lg"
                     title="Add to Cart"
                   >
                     <FaShoppingCart size={18} />

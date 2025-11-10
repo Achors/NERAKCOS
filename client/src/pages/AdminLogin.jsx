@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, fetchApi } from '../api';
 import Navbar from '../components/Navbar';
@@ -15,19 +15,23 @@ const AdminLogin = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
     })
-    .then((data) => {
-      localStorage.setItem('jwt_token', data.access_token);
-      localStorage.setItem('adminUser', JSON.stringify({ name: data.name, email: data.email, role: data.role }));
-      if (data.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/login'); // Redirect non-admins to regular login
-      }
-    })
-    .catch((err) => {
-      alert('Google login failed or not an admin');
-      console.error('Google login error:', err);
-    });
+      .then((data) => {
+        localStorage.setItem('jwt_token', data.access_token);
+        localStorage.setItem(
+          'adminUser',
+          JSON.stringify({ name: data.name, email: data.email, role: data.role })
+        );
+        if (data.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          alert('You are not authorized as admin');
+          navigate('/login');
+        }
+      })
+      .catch((err) => {
+        alert('Google login failed or user not authorized');
+        console.error('Google login error:', err);
+      });
   };
 
   const handleEmailLogin = async (e) => {
@@ -38,7 +42,10 @@ const AdminLogin = () => {
         body: JSON.stringify(credentials),
       });
       localStorage.setItem('jwt_token', response.access_token);
-      localStorage.setItem('adminUser', JSON.stringify({ name: response.name, email: credentials.email, role: response.role }));
+      localStorage.setItem(
+        'adminUser',
+        JSON.stringify({ name: response.name, email: credentials.email, role: response.role })
+      );
       if (response.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
@@ -50,11 +57,26 @@ const AdminLogin = () => {
     }
   };
 
+  useEffect(() => {
+    /* global google */
+    if (window.google) {
+      google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleGoogleLogin,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('googleSignInDiv'),
+        { theme: 'outline', size: 'large' }
+      );
+    }
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Navbar /> {/* Navbar at the top, full width */}
       <div className="flex-1 flex items-center justify-center py-12 px-4">
-        <form onSubmit={handleEmailLogin} className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <form onSubmit={handleEmailLogin} 
+        className="bg-white p-6 rounded shadow-lg w-full max-w-md">
           <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
           <input
             type="email"
@@ -80,20 +102,8 @@ const AdminLogin = () => {
           >
             Login
           </button>
-          <div className="my-4 text-center">or</div>
-          <div id="g_id_onload"
-               data-client_id="YOUR_GOOGLE_CLIENT_ID"  // Replace with your Google Client ID
-               data-callback="handleGoogleLogin"
-               data-auto_prompt="false">
-          </div>
-          <div className="g_id_signin"
-               data-type="standard"
-               data-size="large"
-               data-theme="outline"
-               data-text="sign_in_with"
-               data-shape="rectangular"
-               data-logo_alignment="left">
-          </div>
+            <div className="my-4 text-center">or</div>
+            <div id="googleSignInDiv"></div>
         </form>
       </div>
       <Footer /> {/* Footer at the bottom */}
