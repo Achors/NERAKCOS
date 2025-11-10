@@ -1,10 +1,51 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import User
+from google.oauth2 import id_token
+from google.auth.transport import requests as grequests
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 bp = Blueprint('auth', __name__)
+
+@bp.route('/google', methods=['POST'])
+def google_login():
+    try:
+        data = request.get_json()
+        token = data.get('token')
+        if not token:
+            return jsonify({"error": "Missing token"}), 400
+
+        # Verify Google ID token
+        idinfo = id_token.verify_oauth2_token(token, grequests.Request(), "795109962534-9kcpu7mkuu2bdk88ra8890v7pet37113.apps.googleusercontent.com")
+        email = idinfo['email']
+        name = idinfo.get('name', email.split('@')[0])
+
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            # New user: create account
+            user = User(email=email, name=name, role='customer')
+            # No password for OAuth users
+            db.session.add(user)
+            db.session.commit()
+
+        # Generate JWT
+        access_token = create_access_token(identity=user.id, additional_claims={"role": user.role})
+
+        return jsonify({
+            "message": "Google login successful",
+            "access_token": access_token,
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "role": user.role
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": f"Invalid token: {str(e)}"}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @bp.route('/register', methods=['POST'])
 def register():
