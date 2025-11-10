@@ -136,7 +136,7 @@ const Shop = () => {
       </nav>
 
       <div className="container mx-auto py-8 flex-1">
-        {toast && <div className="fixed top-4 right-4 bg-green-500 text-white p-2 rounded shadow-md z-50">{toast}</div>}
+        {toast && <div className="fixed top-4 right-4 bg-black text-white p-2 rounded shadow-md z-50">{toast}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
