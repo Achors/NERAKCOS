@@ -123,12 +123,15 @@ def add_to_cart():
         "cart_count": get_cart_count(cart_id)
     })
     if not current_user:
+        session_id = cart_id.split('_', 1)[1]
         response.set_cookie(
-            'guest_session', session_id,
+            'guest_session',
+            session_id,
             max_age=30*24*60*60,
             httponly=True,
-            secure=request.is_secure,
-            samesite='Lax'
+            secure=True,           # ← MUST BE TRUE ON HTTPS (Render)
+            samesite='None',       # ← CRITICAL FOR CROSS-SITE
+            path='/'
         )
     return response, 200
 
