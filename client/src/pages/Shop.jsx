@@ -201,14 +201,21 @@ const Shop = () => {
                     </>
                   )}
                 </div>
-                <h3 className="text-lg font-montserrat mt-2">{product.name}</h3>
-                <p className="text-gray-600 font-montserrat">€{product.price.toFixed(2)}</p>
-                <button
-                  onClick={() => addToCart(product.id)}
-                  className="mt-2 w-full bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-900 transition"
-                >
-                  Add to Cart
-                </button>
+
+                <div className="mt-2 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-montserrat">{product.name}</h3>
+                    <p className="text-gray-600 font-montserrat">€{product.price.toFixed(2)}</p>
+                  </div>
+
+                  <button
+                    onClick={() => addToCart(product.id)}
+                    className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-md hover:shadow-lg"
+                    title="Add to Cart"
+                  >
+                    <FaShoppingCart size={18} />
+                  </button>
+                </div>
               </div>
             ))
           ) : (
