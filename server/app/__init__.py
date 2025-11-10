@@ -33,6 +33,7 @@ def create_app(config_class=DevelopmentConfig):
         resources={r"/api/*": {
             "origins": [
                 frontend_url,
+                "http://localhost:5173",
                 "https://nerakcos.vercel.app", 
                 "https://nerakcos-1.onrender.com"
             ],
