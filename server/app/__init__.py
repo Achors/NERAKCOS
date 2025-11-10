@@ -31,7 +31,11 @@ def create_app(config_class=DevelopmentConfig):
     CORS(
         app, 
         resources={r"/api/*": {
-            "origins": [frontend_url],
+            "origins": [
+                frontend_url,
+                "https://nerakcos.vercel.app", 
+                "https://nerakcos-1.onrender.com"
+            ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
