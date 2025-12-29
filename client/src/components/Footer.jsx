@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaTiktok, FaPinterestP, FaTwitter } from 'react-icons/fa'; // Import specific icons
+import { FaWhatsapp, FaEnvelope, FaFacebookF, FaInstagram, FaTiktok, FaPinterestP, FaTwitter } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -88,17 +88,23 @@ const Footer = () => {
               <li className="font-montserrat text-sm sm:text-base">
                 <Link to="/contact" className="hover:text-blue-400">Send a Message</Link>
               </li>
-              <li className="font-montserrat text-sm sm:text-base">
-                Email: <a href="mailto:info@nerakcos.com" className="hover:text-gray-300">info@nerakcos.com</a>
+              <li className="font-montserrat text-sm sm:text-base flex items-center justify-center sm:justify-start">
+                <a href="mailto:nerak.and.cos@gmail.com" className="hover:text-gray-300" aria-label="Email">
+                  <FaEnvelope size={20} />
+                  nerak.and.cos@gmail.com
+                </a>
               </li>
-              <li className="font-montserrat text-sm sm:text-base">
-                Phone: <a href="tel:+1234567890" className="hover:text-gray-300">+1-234-567-890</a>
+              <li className="font-montserrat text-sm sm:text-base flex items-center justify-center sm:justify-start">
+                <a href="https://wa.me/9613030082" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300" aria-label="WhatsApp">
+                  <FaWhatsapp size={20} /> +961 3 030 082
+                  
+                </a>
               </li>
             </ul>
           </div>
         </div>
         <div className="text-center border-t border-gray-800 pt-2 sm:pt-4">
-          <p className="font-montserrat text-gray-400 text-sm sm:text-base">© 2025 NERAKCOS.</p>
+          <p className="font-montserrat text-gray-400 text-sm sm:text-base">© 2026 NERAKCOS.</p>
         </div>
       </div>
     </footer>

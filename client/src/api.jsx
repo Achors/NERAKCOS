@@ -20,9 +20,10 @@ export const API_CONFIG = config[environment];
 export const api = {
   contact: { submit: () => `${API_CONFIG.API_BASE_URL}contact` },
   auth: {
-    register: () => `${API_CONFIG.API_BASE_URL}register`,
-    login: () => `${API_CONFIG.API_BASE_URL}login`,
-    resetPassword: () => `${API_CONFIG.API_BASE_URL}reset-password`,
+    register: () => `${API_CONFIG.API_BASE_URL}auth/register`,
+    login: () => `${API_CONFIG.API_BASE_URL}auth/login`,
+    google: () => `${API_CONFIG.API_BASE_URL}auth/google`,
+    resetPassword: () => `${API_CONFIG.API_BASE_URL}auth/reset-password`,
   },
   profile: {
     get: (userId) => `${API_CONFIG.API_BASE_URL}profile?user_id=${userId}`,
@@ -63,7 +64,9 @@ export const api = {
   },
 
   // Checkout (uses orders.create)
-  checkout: () => `${API_CONFIG.API_BASE_URL}checkout`,
+  checkout: {
+  createSession: () => `${API_CONFIG.API_BASE_URL}create-checkout-session`,
+  },
 };
 
 export const fetchApi = async (url, options = {}) => {

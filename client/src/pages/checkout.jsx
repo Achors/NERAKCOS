@@ -3,17 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
+import { api, fetchApi } from '../api';
+
+// === REMOVED API_URL (YOU DON'T NEED IT) ===
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, cartCount, toast, showToast } = useCart();
   const paypalRef = useRef(null);
+  const stripeRef = useRef(null);
 
-  if (cartCount === 0) {
-    navigate('/cart');
-    return null;
-  }
+  // === LOAD STRIPE ===
+  useEffect(() => {
+    if (!stripeRef.current && window.Stripe) {
+      stripeRef.current = window.Stripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+    }
+  }, []);
 
+  // === REDIRECT IF CART EMPTY ===
+  useEffect(() => {
+    if (cartCount === 0) {
+      navigate('/cart');
+    }
+  }, [cartCount, navigate]);
+
+  // === FORM STATE ===
   const [form, setForm] = useState({
     email: '',
     fullName: '',
@@ -31,11 +45,23 @@ const Checkout = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // === PREFILL EMAIL & NAME FROM LOCALSTORAGE ===
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.email) {
+      setForm(prev => ({
+        ...prev,
+        email: user.email,
+        fullName: user.name || prev.fullName,
+      }));
+    }
+  }, []);
+
   const total = cartItems.reduce((sum, item) => sum + item.total, 0);
   const shippingCost = 10;
   const grandTotal = total + shippingCost;
 
-  // === PAYPAL BUTTON (FRONTEND SIMULATION) ===
+  // === PAYPAL BUTTON (MOCK) ===
   useEffect(() => {
     if (!paypalRef.current || paymentMethod !== 'paypal') return;
 
@@ -52,34 +78,67 @@ const Checkout = () => {
     }).render(paypalRef.current);
   }, [paymentMethod, navigate, showToast]);
 
-  // === SIMULATE iDEAL ===
-  const handleIdeal = () => {
-    showToast('Redirecting to your bank...');
-    setTimeout(() => {
-      showToast('iDEAL: Payment confirmed!');
-      setTimeout(() => navigate('/order-success?method=ideal'), 1500);
-    }, 2000);
+  // === STRIPE CHECKOUT ===
+  const handleStripeCheckout = async () => {
+    if (!stripeRef.current) {
+      showToast('Stripe not loaded');
+      return;
+    }
+
+    setLoading(true);
+    showToast('Redirecting to Stripe...');
+
+    try {
+      const response = await fetchApi(api.checkout.createSession(), {
+        method: 'POST',
+        body: JSON.stringify({
+          shipping: {
+            name: form.fullName,
+            phone: form.phone,
+            address: {
+              line1: form.address,
+              city: form.city,
+              country: form.country === 'Netherlands' ? 'NL' : 'DE',
+              postal_code: '',
+            },
+          },
+          success_url: `${window.location.origin}/order-success?method=stripe`,
+          cancel_url: `${window.location.origin}/checkout`,
+        }),
+      });
+
+      const { id: sessionId } = response;
+
+      const { error } = await stripeRef.current.redirectToCheckout({ sessionId });
+      if (error) showToast(error.message);
+    } catch (err) {
+      showToast(err.message || 'Payment failed');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // === SIMULATE CARD ===
-  const handleCard = () => {
-    showToast('Processing card...');
-    setTimeout(() => {
-      showToast('Card: Payment successful!');
-      setTimeout(() => navigate('/order-success?method=card'), 1500);
-    }, 2000);
-  };
-
+  // === HANDLE SUBMIT ===
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    if (paymentMethod === 'ideal') {
-      handleIdeal();
-    } else if (paymentMethod === 'card') {
-      handleCard();
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+      showToast('Please create an account to checkout');
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
     }
-    // PayPal handled by button
+
+    if (paymentMethod === 'paypal') return;
+
+    const required = ['email', 'fullName', 'phone', 'address', 'city'];
+    if (required.some(field => !form[field])) {
+      showToast('Please fill all required fields');
+      return;
+    }
+
+    handleStripeCheckout();
   };
 
   return (
@@ -181,8 +240,7 @@ const Checkout = () => {
                   <div className="flex items-center gap-3">
                     <input type="radio" name="payment" value="ideal" checked={paymentMethod === 'ideal'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5" />
                     <div className="flex items-center gap-2">
-                      <img src="https://www.ideal.nl/img/ideal-logo.svg" alt="iDEAL" className="h-6" />
-                      <span className="font-medium">iDEAL</span>
+                      <img src="/ideal.png" alt="iDEAL" className="h-8" />
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">Pay via your bank</span>
@@ -197,7 +255,6 @@ const Checkout = () => {
                         <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-5" />
                         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-5" />
                       </div>
-                      <span className="font-medium">Credit/Debit Card</span>
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">Visa, Mastercard</span>
@@ -209,7 +266,6 @@ const Checkout = () => {
                     <input type="radio" name="payment" value="paypal" checked={paymentMethod === 'paypal'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5" />
                     <div className="flex items-center gap-2">
                       <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png" alt="PayPal" className="h-5" />
-                      <span className="font-medium">PayPal</span>
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">Fast & secure</span>
@@ -221,13 +277,35 @@ const Checkout = () => {
                 {paymentMethod === 'paypal' ? (
                   <div ref={paypalRef} className="paypal-button"></div>
                 ) : (
+                  // <button
+                  //   onClick={handleSubmit}
+                  //   disabled={loading}
+                  //   className="w-full py-3 bg-black text-white rounded hover:bg-gray-800 transition font-montserrat disabled:opacity-70"
+                  // >
+                  //   {loading ? 'Redirecting...' : `Pay €${grandTotal.toFixed(2)}`}
+                  // </button>
                   <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="w-full py-3 bg-black text-white rounded hover:bg-gray-800 transition font-montserrat disabled:opacity-70"
-                  >
-                    {loading ? 'Processing...' : `Pay €${grandTotal.toFixed(2)}`}
-                  </button>
+                        onClick={async () => {
+                          try {
+                            const res = await fetchApi(api.checkout.createSession(), {
+                              method: 'POST',
+                              body: JSON.stringify({
+                                shipping: { name: 'Test User', phone: '+31612345678', address: { line1: 'Test 123', city: 'Amsterdam', country: 'NL' } },
+                                success_url: `${window.location.origin}/order-success?method=stripe`,
+                                cancel_url: `${window.location.origin}/checkout`,
+                              }),
+                            });
+                            alert('Session created! ID: ' + res.id);
+                            console.log('STRIPE SESSION:', res);
+                          } catch (err) {
+                            alert('ERROR: ' + err.message);
+                            console.error(err);
+                          }
+                        }}
+                        className="mt-4 p-2 bg-red-500 text-white rounded"
+                      >
+                        TEST STRIPE SESSION (NO PAYMENT)
+                      </button>
                 )}
               </div>
             </div>

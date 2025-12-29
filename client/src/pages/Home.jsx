@@ -33,7 +33,7 @@ const Home = () => {
           <div className="text-center text-black">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">Elevate Your Style</h1>
             <p className="text-lg md:text-xl mb-8">Discover the latest in fashion bags</p>
-            <Link to="/shop" className="bg-black text-slate-100 px-6 py-3 rounded-full font-semibold hover:bg-gray-900 transition">
+            <Link to="/" className="bg-black text-slate-100 px-6 py-3 rounded-full font-semibold hover:bg-gray-900 transition">
               Discover Our Bags
             </Link>
           </div>

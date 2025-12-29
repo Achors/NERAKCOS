@@ -4,6 +4,7 @@ import os
 import uuid
 from app import db
 from app.models import Product, Category
+from .utils import admin_required
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
@@ -66,15 +67,15 @@ def get_product(product_id):
 
 # Create new product
 @bp.route('/products', methods=['POST'])
-@jwt_required()
+@admin_required
 def create_product():
     try:
         # Check if user is admin
-        current_user_id = int(get_jwt_identity())
-        from app.models import User
-        user = User.query.get(current_user_id)
-        if not user or not user.is_admin():
-            return jsonify({'error': 'Admin access required'}), 403
+        # current_user_id = int(get_jwt_identity())
+        # from app.models import User
+        # user = User.query.get(current_user_id)
+        # if not user or not user.is_admin():
+        #     return jsonify({'error': 'Admin access required'}), 403
         
         # Get form data
         name = request.form.get('name')
@@ -128,15 +129,15 @@ def create_product():
 
 # Update product
 @bp.route('/products/<int:product_id>', methods=['PUT'])
-@jwt_required()
+@admin_required
 def update_product(product_id):
     try:
-        # Check if user is admin
-        current_user_id = int(get_jwt_identity())
-        from app.models import User
-        user = User.query.get(current_user_id)
-        if not user or not user.is_admin():
-            return jsonify({'error': 'Admin access required'}), 403
+        # # Check if user is admin
+        # current_user_id = int(get_jwt_identity())
+        # from app.models import User
+        # user = User.query.get(current_user_id)
+        # if not user or not user.is_admin():
+        #     return jsonify({'error': 'Admin access required'}), 403
             
         product = Product.query.get_or_404(product_id)
         
@@ -193,15 +194,15 @@ def update_product(product_id):
 
 # Delete product
 @bp.route('/products/<int:product_id>', methods=['DELETE'])
-@jwt_required()
+@admin_required
 def delete_product(product_id):
     try:
-        # Check if user is admin
-        current_user_id = int(get_jwt_identity())
-        from app.models import User
-        user = User.query.get(current_user_id)
-        if not user or not user.is_admin():
-            return jsonify({'error': 'Admin access required'}), 403
+        # # Check if user is admin
+        # current_user_id = int(get_jwt_identity())
+        # from app.models import User
+        # user = User.query.get(current_user_id)
+        # if not user or not user.is_admin():
+        #     return jsonify({'error': 'Admin access required'}), 403
             
         product = Product.query.get_or_404(product_id)
         
@@ -209,11 +210,12 @@ def delete_product(product_id):
         image_urls = product.get_image_urls()
         for url in image_urls:
             try:
-                # Convert URL to file path and delete
-                if url.startswith('/uploads/'):
-                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], url.split('/')[-1])
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
+                # This finds the filename regardless of 'static/' or '/uploads/' prefixes
+                filename = url.split('/')[-1]
+                file_path = os.path.join(current_app.root_path, 'static', 'uploads', 'products', filename)
+                
+                if os.path.exists(file_path):
+                    os.remove(file_path)
             except Exception as e:
                 print(f"Error deleting image file: {e}")
         
@@ -236,15 +238,15 @@ def get_categories():
 
 # Create category (admin only)
 @bp.route('/categories', methods=['POST'])
-@jwt_required()
+@admin_required
 def create_category():
     try:
-        # Check if user is admin
-        current_user_id = int(get_jwt_identity())
-        from app.models import User
-        user = User.query.get(current_user_id)
-        if not user or not user.is_admin():
-            return jsonify({'error': 'Admin access required'}), 403
+        # # Check if user is admin
+        # current_user_id = int(get_jwt_identity())
+        # from app.models import User
+        # user = User.query.get(current_user_id)
+        # if not user or not user.is_admin():
+        #     return jsonify({'error': 'Admin access required'}), 403
             
         data = request.get_json()
         name = data.get('name')

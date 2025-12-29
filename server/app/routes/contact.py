@@ -25,7 +25,7 @@ def submit_contact():
         # Send email notification
         msg = Message(
             subject=f"New Contact Form Submission: {data['subject']}",
-            recipients=['alocastlimited@gmail.com'],  # Your email
+            recipients=['nerak.and.cos@gmail.com'],  
             body=f"Name: {data['name']}\nEmail: {data['email']}\nMessage: {data['message']}"
         )
         mail.send(msg)

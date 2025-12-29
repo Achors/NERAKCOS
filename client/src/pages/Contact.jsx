@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { api, fetchApi } from '../api';
@@ -47,8 +48,18 @@ const Contact = () => {
    {/* Contact Info */}
 <div className="bg-stone-200 p-6 rounded-lg shadow-lg relative">
   <h2 className="text-2xl font-montserrat text-gray-800 mb-4">Get in Touch</h2>
-  <p className="text-gray-600">Email: info@nerakcos.com</p>
-  <p className="text-gray-600">Phone: +31-613030082</p>
+  <div className="flex items-center space-x-4 mb-2">
+    <a href="mailto:nerak.and.cos@gmail.com" className="text-gray-600 hover:text-gray-800" aria-label="Email">
+      Email Us
+      <FaEnvelope size={22} />
+      
+    </a>
+    <a href="https://wa.me/31613030082" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-green-600" aria-label="WhatsApp">
+      WhatsApp Us
+      <FaWhatsapp size={24} />
+      
+    </a>
+  </div>
   <p className="text-gray-600">Address: Nicolaas Maestraat 43, 7545 CD Enschede, <em>Netherlands</em></p>
   <p className="text-gray-600 mt-4">Hours: Mon-Fri, 9 AM - 6 PM (CET)</p>
   <div className="absolute bottom-2 left-0 w-full h-16 overflow-hidden"> {/* Increased h-12 to h-16 */}

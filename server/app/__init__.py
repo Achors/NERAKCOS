@@ -8,6 +8,10 @@ from flask_mail import Mail
 from flask import signals
 from config import DevelopmentConfig, ProductionConfig
 import os
+from dotenv import load_dotenv
+import stripe
+
+load_dotenv()  # Load environment variables from .env file
 
 # Initialize extensions outside create_app to avoid circular imports
 db = SQLAlchemy()
@@ -20,6 +24,9 @@ def create_app(config_class=DevelopmentConfig):
     app.config.from_object(config_class)
     app.config["JWT_SECRET_KEY"] = "super-secret-key"  # Replace with env var in production
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')  # Define upload folder
+
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    app.config['STRIPE_WEBHOOK_SECRET'] = os.getenv('STRIPE_WEBHOOK_SECRET')
 
     # Initialize extensions
     db.init_app(app)
@@ -34,6 +41,7 @@ def create_app(config_class=DevelopmentConfig):
             "origins": [
                 frontend_url,
                 "http://localhost:5173",
+                "http://127.0.0.1:5173",
                 "https://nerakcos.vercel.app", 
                 "https://nerakcos-1.onrender.com"
             ],
@@ -42,6 +50,11 @@ def create_app(config_class=DevelopmentConfig):
             "supports_credentials": True
         }}
     )
+
+    @app.after_request
+    def add_header(response):
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+        return response
 
     # Import blueprints after app initialization
     from app.routes.contact import bp as contact_bp
@@ -55,6 +68,8 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes.categories import bp as categories_bp, initialize_default_categories
     from app.routes.upload import upload_bp, init_upload
     from app.routes.cart import bp as cart_bp
+    from app.routes.checkout import bp as checkout_bp
+    from app.routes.webhook import bp as webhook_bp
 
     app.register_blueprint(contact_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
@@ -67,6 +82,8 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(collaborate_bp, url_prefix='/api')
     app.register_blueprint(categories_bp, url_prefix='/api')
     app.register_blueprint(upload_bp, url_prefix='/api')
+    app.register_blueprint(checkout_bp, url_prefix='/api')
+    app.register_blueprint(webhook_bp)
 
     # Initialize upload configuration
     init_upload(app)

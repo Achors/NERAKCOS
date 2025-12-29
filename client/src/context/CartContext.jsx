@@ -78,7 +78,7 @@ export const CartProvider = ({ children }) => {
   // === CHECKOUT ===
   const checkout = async (shipping, paymentMethod) => {
     try {
-      await fetchApi(api.checkout(), {
+      const response = await fetchApi(api.checkout(), {
         method: 'POST',
         body: JSON.stringify({ shipping, payment_method: paymentMethod }),
       });
@@ -105,6 +105,7 @@ export const CartProvider = ({ children }) => {
         cartCount,
         loading,
         toast,
+        showToast,
         addToCart,
         updateQuantity,
         removeFromCart,

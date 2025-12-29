@@ -79,7 +79,7 @@ const Shop = () => {
             </div>
             <h2 className="text-lg sm:text-2xl font-montserrat text-black">Shop</h2>
             <div className="flex items-center space-x-2">
-              <Link to="/" className="text-sm sm:text-base bg-transparent border border-slate-100 px-2 sm:px-4 py-1 sm:py-2 rounded hover:bg-slate-200 transition">
+              <Link to="/home" className="text-sm sm:text-base bg-transparent border border-slate-100 px-2 sm:px-4 py-1 sm:py-2 rounded hover:bg-slate-200 transition">
                 Back
               </Link>
               <Link to="/cart" className="relative text-sm sm:text-base bg-transparent border border-slate-100 px-2 sm:px-4 py-1 sm:py-2 rounded hover:bg-slate-200 transition">

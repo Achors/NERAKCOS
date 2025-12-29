@@ -6,7 +6,7 @@ from google.auth.transport import requests as grequests
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-bp = Blueprint('auth', __name__)
+bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/google', methods=['POST'])
 def google_login():

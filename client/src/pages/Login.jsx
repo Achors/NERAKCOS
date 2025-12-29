@@ -5,40 +5,40 @@ import Navbar from '../components/Navbar';
 import { api, fetchApi } from '../api';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
+import { useLocation } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const from = location.state?.from || '/';
   const { loadCart } = useCart();
 
   const handleGoogleLogin = async (response) => {
     const token = response.credential;
     try {
-      const data = await fetchApi('http://localhost:5000/api/auth/google', {
+      const response = await fetchApi(api.auth.login(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify(formData),
       });
 
       // Save your backend-issued JWT and user info
-      localStorage.setItem('jwt_token', data.access_token);
+      localStorage.setItem('jwt_token', response.access_token);
       localStorage.setItem('user', JSON.stringify({
-        name: data.name,
-        email: data.email,
-        role: data.role
+        name: response.name,
+        email: formData.email,
+        role: response.role
       }));
 
       // Merge guest cart
       await loadCart();
 
-      if (data.role === 'admin') {
+      if (response.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
-        navigate('/');
+        navigate(from, { replace: true }); // ← BACK TO CHECKOUT
       }
-      setError('');
     } catch (err) {
       setError(err.message || 'Google login failed');
     }
@@ -81,7 +81,7 @@ const Login = () => {
       if (response.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
-        navigate('/');
+        navigate(from, { replace: true });
       }
       setError('');
     } catch (err) {

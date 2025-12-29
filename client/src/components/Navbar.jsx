@@ -28,11 +28,11 @@ const Navbar = () => {
       <div className="container mx-auto flex justify-between items-center">
         {/* Left Section: Logo and NERAKCOS Link */}
         <div className="flex-shrink-0 flex items-center space-x-4">
-          <Link to="/">
+          <Link to="/home">
             <img src="/n_logo.png" alt="NERAKCOS Logo" className="h-10" />
           </Link>
           <Link
-            to="/"
+            to="/home"
             className="text-black text-xl font-bold font-montserrat hover:text-neutral-950 transition"
           >
             NERAKCOS
@@ -43,10 +43,14 @@ const Navbar = () => {
         <div className="lg:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-black focus:outline-none p-1"
+            className={`relative flex items-center justify-center w-12 h-12 rounded-full border-1 border-black-300 bg-white shadow-md transition-all duration-300 focus:outline-none ${isOpen ? 'bg-gray-200 border-gray-400' : 'hover:bg-gray-100 hover:border-gray-400'}`}
             aria-label="Toggle menu"
           >
-            {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+            {isOpen ? (
+              <FaTimes size={28} className="text-red-500 transition-all duration-300" />
+            ) : (
+              <FaBars size={28} className="text-black transition-all duration-300" />
+            )}
           </button>
         </div>
 
@@ -58,10 +62,16 @@ const Navbar = () => {
         >
           <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full">
             <Link
-              to="/shop"
+              to="/"
               className="block lg:inline-block text-black hover:text-neutral-950 font-montserrat py-2 lg:py-0"
             >
               Shop
+            </Link>
+            <Link
+              to="/home"
+              className="block lg:inline-block text-black hover:text-neutral-950 font-montserrat py-2 lg:py-0"
+            >
+              Home
             </Link>
             <Link
               to="/about"
@@ -78,7 +88,7 @@ const Navbar = () => {
             {/* Login Dropdown */}
             <div className="relative">
               <button
-                onClick={toggleLoginDropdown} // Click to toggle
+                onClick={toggleLoginDropdown} 
                 onMouseEnter={() => setIsLoginDropdownOpen(true)} // Hover to open
                 onMouseLeave={handleMouseLeave} // Delay close
                 className="block lg:inline-block bg-transparent text-black px-4 py-2 rounded border-none hover:bg-slate-300 hover:bg-opacity-100 hover:backdrop-blur-sm transition duration-300 font-montserrat"
